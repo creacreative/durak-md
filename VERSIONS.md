@@ -1,5 +1,9 @@
 # Versiuni Durak MD
 
+## v2.0.4 — 22 iulie 2026
+
+- Baloanele păstrează și afișează replica deja aleasă în animația de început.
+
 ## v2.0.3 — 22 iulie 2026
 
 - Personajele afișează din nou o replică moldovenească în timpul animației de gândire.
