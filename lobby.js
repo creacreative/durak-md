@@ -18,8 +18,10 @@
   };
 
   showPlayer(localStorage.getItem("durak_nickname") || nicknameInput.value);
-  nicknameInput.addEventListener("input", () => {
-    const nickname = showPlayer(nicknameInput.value);
+  const saveNickname = value => {
+    const nickname = showPlayer(value);
     localStorage.setItem("durak_nickname", nickname);
-  });
+  };
+  nicknameInput.addEventListener("input", () => saveNickname(nicknameInput.value));
+  if (onlineName) onlineName.addEventListener("input", () => saveNickname(onlineName.value));
 })();
