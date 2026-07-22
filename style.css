@@ -250,3 +250,7 @@ body:after{content:"";position:fixed;inset:-20%;pointer-events:none;background:l
 /* Nu afișa un balon gol atunci când personajul doar se gândește. */
 .bot-avatar.thinking:not(.talking) .thought{opacity:0!important;transform:scale(.7)!important}
 .bot-seat .bot-avatar.thinking:not(.talking) .thought{transform:translateX(-50%) scale(.72)!important}
+
+/* Cartea de atu de sub teanc rămâne fixă între actualizările mesei. */
+.trump,.trump .card{animation:none!important}
+.trump{filter:drop-shadow(0 0 8px #f0bd49)}

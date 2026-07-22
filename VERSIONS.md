@@ -1,5 +1,9 @@
 # Versiuni Durak MD
 
+## v2.0.2 — 22 iulie 2026
+
+- Cartea de atu de sub teanc rămâne statică și nu mai repornește animații la actualizarea mesei.
+
 ## v2.0.1 — 22 iulie 2026
 
 - Reparat balonul alb care apărea fără text când personajul se gândea.
