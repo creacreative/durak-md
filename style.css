@@ -96,6 +96,11 @@ body:after{content:"";position:fixed;inset:-20%;pointer-events:none;background:l
 @keyframes playableCardPulse{to{box-shadow:0 13px 28px #000d,0 0 27px 8px #ffe06ad9;outline-color:#fff1a6}}
 @media(max-width:700px){.player-card.playable-card{outline-width:3px;outline-offset:1px}.player-card.playable-card .corner{padding:2px 3px}}
 
+/* Versiunea instalată și notificarea pentru o versiune nouă */
+.version-badge{position:fixed;right:12px;bottom:10px;z-index:160;padding:6px 10px;border:1px solid #ffffff36;border-radius:999px;background:#071c17d9;color:#fff9;font-size:10px;font-weight:800;letter-spacing:.05em;box-shadow:0 4px 14px #0007;backdrop-filter:blur(6px);pointer-events:none}.update-notice{position:fixed;left:50%;top:16px;z-index:220;display:grid;grid-template-columns:auto auto;align-items:center;gap:2px 9px;min-width:260px;padding:11px 17px;border:2px solid #ffe694;border-radius:15px;background:linear-gradient(135deg,#f2b934,#ffd96a);color:#18201d;box-shadow:0 12px 34px #000b,0 0 22px #f2bd4a88;cursor:pointer;transform:translateX(-50%);animation:updateNoticePulse 1.4s ease-in-out infinite alternate}.update-notice[hidden]{display:none}.update-notice span{font-size:13px;font-weight:950;letter-spacing:.09em}.update-notice b{font-size:14px}.update-notice small{grid-column:1/-1;font-size:10px;font-weight:750;opacity:.72}.update-notice:hover{filter:brightness(1.08)}
+@keyframes updateNoticePulse{to{transform:translateX(-50%) scale(1.035);box-shadow:0 15px 38px #000c,0 0 30px #ffe176bb}}
+@media(max-width:700px){.version-badge{right:7px;bottom:7px;font-size:8px}.update-notice{top:8px;min-width:240px;padding:9px 13px}.update-notice span{font-size:12px}}
+
 /* Botul aruncă vizibil cartea din propria mână spre masă */
 .bot-thrown-card{position:fixed;z-index:80;width:78px;height:114px;margin:0;pointer-events:none;animation:botThrowCard var(--throw-duration,900ms) linear forwards;filter:drop-shadow(0 14px 13px #0009);will-change:transform,opacity;backface-visibility:hidden}.bot-thrown-card.relaxed-throw{filter:drop-shadow(0 12px 14px #0007)}.bot-thrown-card.stress-throw{filter:drop-shadow(0 17px 10px #000b) saturate(1.12)}
 .bot-landing .pair{animation:none!important}.bot-landing .pair .card:not(.defense){animation:none!important}

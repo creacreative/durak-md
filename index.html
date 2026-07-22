@@ -40,6 +40,12 @@
   </main>
 
   <div id="fx" class="fx" aria-hidden="true"></div>
+  <button id="updateNotice" class="update-notice" type="button" hidden aria-live="polite">
+    <span>UPDATE AVAILABLE</span>
+    <b id="latestVersion">v1.0.0</b>
+    <small>Apasă pentru actualizare</small>
+  </button>
+  <div id="versionBadge" class="version-badge" title="Versiunea curentă">Versiunea v1.0.0</div>
   <div id="mainMenu" class="modal setup-modal">
     <div class="modal-card setup-card main-lobby-card">
       <div class="result-icon">🃏</div><h2>Lobby Durak</h2>
@@ -92,5 +98,6 @@
   <script src="game.js?v=playable-cards-v3"></script>
   <script src="lobby.js?v=explicit-space-key-v2"></script>
   <script src="online.js?v=playable-cards-v3"></script>
+  <script src="version-check.js?v=1.0.0" data-version="1.0.0"></script>
 </body>
 </html>
