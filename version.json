@@ -1,5 +1,5 @@
 {
-  "version": "1.2.1",
+  "version": "2.0.0",
   "releasedAt": "2026-07-22",
-  "notes": "Perevodul a fost scos; apărătorul poate doar să bată sau să ia masa."
+  "notes": "Reconectare, gazdă de rezervă, jucători pregătiți, emote-uri, istoric, profil, monede, garderobă și podium animat."
 }

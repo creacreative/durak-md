@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Durak</title>
-  <link rel="stylesheet" href="style.css?v=turn-timer-v6" />
+  <link rel="stylesheet" href="style.css?v=social-profile-v7" />
 </head>
 <body>
   <main class="game">
@@ -40,13 +40,24 @@
     </section>
   </main>
 
+  <aside id="moveHistory" class="move-history" hidden>
+    <strong>Ultimele mutări</strong>
+    <div id="historyList"></div>
+  </aside>
+  <nav id="emoteBar" class="emote-bar" hidden aria-label="Reacții rapide">
+    <button data-emote="think" title="Gândesc">🤔</button>
+    <button data-emote="attack" title="Atac">😏</button>
+    <button data-emote="laugh" title="Râd">😂</button>
+    <button data-emote="angry" title="Supărat">😡</button>
+  </nav>
+
   <div id="fx" class="fx" aria-hidden="true"></div>
   <button id="updateNotice" class="update-notice" type="button" hidden aria-live="polite">
     <span>UPDATE AVAILABLE</span>
-    <b id="latestVersion">v1.2.1</b>
+    <b id="latestVersion">v2.0.0</b>
     <small>Apasă pentru actualizare</small>
   </button>
-  <div id="versionBadge" class="version-badge" title="Versiunea curentă">Versiunea v1.2.1</div>
+  <div id="versionBadge" class="version-badge" title="Versiunea curentă">Versiunea v2.0.0</div>
   <div id="mainMenu" class="modal setup-modal">
     <div class="modal-card setup-card main-lobby-card">
       <div class="result-icon">🃏</div><h2>Lobby Durak</h2>
@@ -54,6 +65,7 @@
       <label class="nickname-label" for="lobbyNickname">Nickname</label>
       <input id="lobbyNickname" class="nickname-square" maxlength="16" placeholder="Nickname" value="Jucător" autocomplete="nickname" />
       <div id="lobbyPlayers" class="lobby-player-list" aria-label="Jucători în lobby"><div class="lobby-player-row"><span class="lobby-player-avatar">J</span><b>Jucător</b><small>TU</small></div></div>
+      <button id="profileButton" class="profile-button">👤 Profil și garderobă</button>
       <div class="mode-buttons"><button id="singleMode" class="action">🤖 Singleplayer</button><button id="multiMode" class="action secondary">🌐 Multiplayer</button></div>
     </div>
   </div>
@@ -77,7 +89,7 @@
       <div id="lobbyChoices" class="mode-buttons"><button id="hostRoom" class="action">Creează cameră</button><button id="showJoin" class="action secondary">Intră cu un cod</button></div>
       <div id="joinArea" hidden><input id="roomCode" class="lobby-input code-input" maxlength="8" placeholder="COD CAMERĂ" /><button id="joinRoom" class="action">Conectează-te</button></div>
       <div id="publicArea" hidden></div>
-      <div id="roomArea" hidden><p>Codul camerei</p><button id="copyCode" class="room-code">--------</button><div id="onlinePlayers" class="online-players"></div><p id="networkStatus" class="network-status">Se conectează…</p><button id="startOnline" class="action" hidden>Pornește partida</button></div>
+      <div id="roomArea" hidden><p>Codul camerei</p><button id="copyCode" class="room-code">--------</button><div id="onlinePlayers" class="online-players"></div><p id="networkStatus" class="network-status">Se conectează…</p><button id="readyOnline" class="action ready-action">Sunt gata</button><button id="startOnline" class="action" hidden>Pornește partida</button></div>
     </div>
   </div>
   <div id="modal" class="modal" hidden>
@@ -85,20 +97,33 @@
       <div id="resultIcon" class="result-icon">🏆</div>
       <h2 id="resultTitle">Ai câștigat!</h2>
       <p id="resultText"></p>
+      <div id="podium" class="podium"></div>
       <div id="standings" class="standings"></div>
       <button id="playAgain" class="action">Mai joacă o dată</button>
+    </div>
+  </div>
+  <div id="profileModal" class="modal" hidden>
+    <div class="modal-card profile-card">
+      <button id="closeProfile" class="lobby-back">← Înapoi</button>
+      <div id="profilePreview" class="profile-preview"></div>
+      <h2>Profilul meu</h2>
+      <div class="coin-balance"><b id="profileCoins">0</b> 🪙</div>
+      <div id="profileStats" class="profile-stats"></div>
+      <h3>Garderobă</h3>
+      <div id="shopItems" class="shop-items"></div>
     </div>
   </div>
   <script src="vendor/peerjs.min.js"></script>
   <script src="opening-sequence.js"></script>
   <script src="avatar-arrival.js"></script>
   <script src="round-table-layout.js"></script>
+  <script src="player-profile.js?v=profile-v2"></script>
   <script src="moldovan-vocabulary.js?v=multiplayer-dialog-v2"></script>
-  <script src="multiplayer-reactions.js?v=multiplayer-dialog-v2"></script>
-  <script src="multiplayer-session.js?v=turn-clock-v4"></script>
-  <script src="game.js?v=playable-cards-v3"></script>
+  <script src="multiplayer-reactions.js?v=emotes-v3"></script>
+  <script src="multiplayer-session.js?v=ready-host-v5"></script>
+  <script src="game.js?v=profile-history-v4"></script>
   <script src="lobby.js?v=explicit-space-key-v2"></script>
-  <script src="online.js?v=no-perevod-v8"></script>
-  <script src="version-check.js?v=1.2.1" data-version="1.2.1"></script>
+  <script src="online.js?v=resilient-mp-v9"></script>
+  <script src="version-check.js?v=2.0.0" data-version="2.0.0"></script>
 </body>
 </html>

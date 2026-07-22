@@ -6,7 +6,7 @@
   const ranks = ["6", "7", "8", "9", "10", "J", "Q", "K", "A"];
   const suits = ["♠", "♥", "♦", "♣"];
 
-  function lobbyStatusFor(playerCount, isHost) {
+  function lobbyStatusFor(playerCount, isHost, readyCount = playerCount) {
     if (playerCount < 2) {
       return {
         canStart: false,
@@ -14,9 +14,16 @@
       };
     }
 
+    if (readyCount < playerCount) {
+      return {
+        canStart: false,
+        message: `${readyCount}/${playerCount} pregătiți. Așteaptă confirmarea tuturor.`
+      };
+    }
+
     return isHost
-      ? { canStart: true, message: `${playerCount}/6 conectați. Poți porni partida.` }
-      : { canStart: false, message: `${playerCount}/6 conectați. Așteaptă gazda să pornească.` };
+      ? { canStart: true, message: `${playerCount}/6 conectați. Toți sunt gata.` }
+      : { canStart: false, message: `${playerCount}/6 conectați. Toți sunt gata; așteaptă gazda.` };
   }
 
   function shuffledDeck(random = Math.random) {
@@ -51,7 +58,8 @@
       eyeStyle: "round-eyes",
       facialHair: "clean-face",
       tattoo: "none",
-      outfit: "coat"
+      outfit: "coat",
+      ...(player.look || {})
     }));
     let lastCard = null;
     for (let round = 0; round < 6; round += 1) {
@@ -81,7 +89,9 @@
       defender,
       phase: "attack",
       limit: Math.min(6, players.find(player => player.id === defender).hand.length),
-      winner: []
+      winner: [],
+      history: [],
+      gameId: `online-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     };
   }
 

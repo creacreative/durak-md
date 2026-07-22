@@ -4,7 +4,10 @@
       attack: { phraseKind: "attack", emotion: "laughing" },
       defend: { phraseKind: "laugh", emotion: "laughing" },
       take: { phraseKind: "angry", emotion: "angry" },
-      finish: { phraseKind: "laugh", emotion: "laughing" }
+      finish: { phraseKind: "laugh", emotion: "laughing" },
+      think: { phraseKind: "think", emotion: "thinking" },
+      laugh: { phraseKind: "laugh", emotion: "laughing" },
+      angry: { phraseKind: "angry", emotion: "angry" }
     };
     const type = reactionTypes[kind];
     if (!type) return null;

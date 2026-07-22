@@ -1,5 +1,16 @@
 # Versiuni Durak MD
 
+## v2.0.0 — 22 iulie 2026
+
+- Reconectare automată timp de 60 de secunde, cu aceeași mână și același loc.
+- Un succesor desemnat preia automat rolul gazdei și continuă partida.
+- Partida pornește numai după ce toți apasă „Sunt gata”.
+- Patru reacții rapide folosesc vocabularul moldovenesc existent și sunt sincronizate.
+- Istoricul ultimelor mutări este vizibil pe toate dispozitivele.
+- Profil local cu partide, victorii, locuri întâi și statistica Durak.
+- Monede câștigate după partidă și garderobă cu accesorii, haine, bărbi și tatuaje.
+- Podium final animat, cu bucuria câștigătorului și reacția celui rămas Durak.
+
 ## v1.2.1 — 22 iulie 2026
 
 - Perevodul a fost eliminat din multiplayer.
