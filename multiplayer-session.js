@@ -101,15 +101,18 @@
   }
 
   function localizeReactionForClient(view, receivedAt = Date.now()) {
-    if (!view?.reaction || !Number.isFinite(view.sentAt) || !Number.isFinite(view.reaction.expiresAt)) return view;
-    const remainingMs = Math.max(0, view.reaction.expiresAt - view.sentAt);
-    return {
-      ...view,
-      reaction: {
+    if (!view || !Number.isFinite(view.sentAt)) return view;
+    const localized = { ...view };
+    if (Number.isFinite(view.turnDeadline)) {
+      localized.turnDeadline = receivedAt + Math.max(0, view.turnDeadline - view.sentAt);
+    }
+    if (view.reaction && Number.isFinite(view.reaction.expiresAt)) {
+      localized.reaction = {
         ...view.reaction,
-        expiresAt: receivedAt + remainingMs
-      }
-    };
+        expiresAt: receivedAt + Math.max(0, view.reaction.expiresAt - view.sentAt)
+      };
+    }
+    return localized;
   }
 
   return { lobbyStatusFor, startGame, viewForPlayer, localizeReactionForClient };

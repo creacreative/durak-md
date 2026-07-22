@@ -1,5 +1,12 @@
 # Versiuni Durak MD
 
+## v1.2.0 — 22 iulie 2026
+
+- Timer vizibil de 30 de secunde pentru fiecare mutare multiplayer.
+- Dacă un jucător nu reacționează, gazda alege automat mutarea sigură și partida continuă.
+- Timerul este sincronizat corect chiar dacă dispozitivele au ore diferite.
+- Atacul multiplu rămâne deschis până la confirmare sau până expiră timpul.
+
 ## v1.1.2 — 22 iulie 2026
 
 - Protecție anti-spam individuală pentru comenzile multiplayer.

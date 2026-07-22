@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Durak</title>
-  <link rel="stylesheet" href="style.css?v=no-card-hints-v5" />
+  <link rel="stylesheet" href="style.css?v=turn-timer-v6" />
 </head>
 <body>
   <main class="game">
@@ -27,6 +27,7 @@
           <div class="empty-table">Masa este liberă</div>
         </div>
         <div class="turn-panel">
+          <div id="turnTimer" class="turn-timer" hidden aria-live="polite">⏱ 30s</div>
           <div id="status" class="status">Se împart cărțile…</div>
           <button id="actionBtn" class="action" hidden></button>
         </div>
@@ -42,10 +43,10 @@
   <div id="fx" class="fx" aria-hidden="true"></div>
   <button id="updateNotice" class="update-notice" type="button" hidden aria-live="polite">
     <span>UPDATE AVAILABLE</span>
-    <b id="latestVersion">v1.1.2</b>
+    <b id="latestVersion">v1.2.0</b>
     <small>Apasă pentru actualizare</small>
   </button>
-  <div id="versionBadge" class="version-badge" title="Versiunea curentă">Versiunea v1.1.2</div>
+  <div id="versionBadge" class="version-badge" title="Versiunea curentă">Versiunea v1.2.0</div>
   <div id="mainMenu" class="modal setup-modal">
     <div class="modal-card setup-card main-lobby-card">
       <div class="result-icon">🃏</div><h2>Lobby Durak</h2>
@@ -94,10 +95,10 @@
   <script src="round-table-layout.js"></script>
   <script src="moldovan-vocabulary.js?v=multiplayer-dialog-v2"></script>
   <script src="multiplayer-reactions.js?v=multiplayer-dialog-v2"></script>
-  <script src="multiplayer-session.js?v=reaction-clock-v3"></script>
+  <script src="multiplayer-session.js?v=turn-clock-v4"></script>
   <script src="game.js?v=playable-cards-v3"></script>
   <script src="lobby.js?v=explicit-space-key-v2"></script>
-  <script src="online.js?v=anti-spam-v6"></script>
-  <script src="version-check.js?v=1.1.2" data-version="1.1.2"></script>
+  <script src="online.js?v=turn-timeout-v7"></script>
+  <script src="version-check.js?v=1.2.0" data-version="1.2.0"></script>
 </body>
 </html>

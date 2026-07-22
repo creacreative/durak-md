@@ -1,8 +1,8 @@
 (()=>{
-const ui=id=>document.getElementById(id);let peer=null,isHost=false,room="",myPlayerId=null,nextPlayerNumber=0,connections=[],onlineState=null,onlineActive=false,publicHosting=false,reactionTimer=null,reactionViewTimer=null,onlineAttackBatchTimer=null,joinTimer=null,antiSpamTimer=null,joinRejected=false,onlineOpeningVisual=null,onlineOpeningRun=0,pendingOnlineState=null,localActionTimes=[];
-const ONLINE_ATTACK_BATCH_MS=900;
+const ui=id=>document.getElementById(id);let peer=null,isHost=false,room="",myPlayerId=null,nextPlayerNumber=0,connections=[],onlineState=null,onlineActive=false,publicHosting=false,reactionTimer=null,reactionViewTimer=null,onlineAttackBatchTimer=null,onlineTurnTimer=null,turnClockTimer=null,joinTimer=null,antiSpamTimer=null,joinRejected=false,onlineOpeningVisual=null,onlineOpeningRun=0,pendingOnlineState=null,localActionTimes=[];
 const JOIN_TIMEOUT_MS=Number(window.__DURAK_JOIN_TIMEOUT_MS)||12000;
 const ONLINE_OPENING_SPEED=Math.max(0,Number(window.__DURAK_OPENING_SPEED??1));
+const TURN_TIMEOUT_MS=Number(window.__DURAK_TURN_TIMEOUT_MS)||30000;
 const ACTION_RATE_WINDOW_MS=2000,ACTION_RATE_MAX=10,ACTION_BLOCK_MS=3000;
 const ranks=["6","7","8","9","10","J","Q","K","A"],suits=["♠","♥","♦","♣"];
 const rank=c=>ranks.indexOf(c.rank)+(c.suit===onlineState?.trump?20:0),beatsOnline=(d,a)=>(d.suit===a.suit&&rank(d)>rank(a))||(d.suit===onlineState.trump&&a.suit!==onlineState.trump);
@@ -10,13 +10,14 @@ const status=(t,bad=false)=>{ui("networkStatus").textContent=t;ui("networkStatus
 const cleanOnlineName=value=>(String(value||"").trim().replace(/\s+/g," ").slice(0,16)||"Jucător"),onlineNameKey=value=>cleanOnlineName(value).normalize("NFKC").toLocaleLowerCase("ro"),escapeOnlineHtml=value=>String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
 const cleanRoomCode=value=>String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6);
 function notifyOnlineLeave(){if(!isHost&&myPlayerId&&connections[0]?.open)send(connections[0],{type:"leave"})}
-function cleanPeer(){notifyOnlineLeave();onlineOpeningRun++;onlineOpeningVisual=null;pendingOnlineState=null;localActionTimes=[];clearTimeout(reactionTimer);clearTimeout(reactionViewTimer);clearTimeout(onlineAttackBatchTimer);clearTimeout(joinTimer);clearTimeout(antiSpamTimer);joinTimer=null;document.body.classList.remove("online-active","opening-active");ui("playerReaction").textContent="";if(publicHosting&&room)window.DurakAuth?.closeRoom(room);publicHosting=false;if(peer)peer.destroy();peer=null;connections=[];onlineActive=false;joinRejected=false}
+function cleanPeer(){notifyOnlineLeave();onlineOpeningRun++;onlineOpeningVisual=null;pendingOnlineState=null;localActionTimes=[];clearTimeout(reactionTimer);clearTimeout(reactionViewTimer);clearTimeout(onlineAttackBatchTimer);clearTimeout(onlineTurnTimer);clearTimeout(turnClockTimer);joinTimer&&clearTimeout(joinTimer);clearTimeout(antiSpamTimer);joinTimer=null;onlineTurnTimer=null;turnClockTimer=null;document.body.classList.remove("online-active","opening-active");ui("playerReaction").textContent="";ui("turnTimer").hidden=true;if(publicHosting&&room)window.DurakAuth?.closeRoom(room);publicHosting=false;if(peer)peer.destroy();peer=null;connections=[];onlineActive=false;joinRejected=false}
 function reactOnline(playerId,kind){let reaction=window.DurakMultiplayerReactions.createMultiplayerReaction(playerId,kind);if(!reaction)return;onlineState.reaction=reaction;clearTimeout(reactionTimer);reactionTimer=setTimeout(()=>{if(isHost&&onlineState?.reaction?.id===reaction.id){delete onlineState.reaction;sync()}},Math.max(0,reaction.expiresAt-Date.now()))}
 const waitOnline=ms=>new Promise(resolve=>setTimeout(resolve,ms*ONLINE_OPENING_SPEED));
 function createOnlineOpening(players){let emotions=["happy","angry","neutral"];return{id:`${Date.now()}-${Math.random().toString(36).slice(2,7)}`,reactions:players.map(player=>{let emotion=emotions[Math.floor(Math.random()*emotions.length)],kind=emotion==="happy"?"laugh":emotion==="angry"?"angry":"think";return{playerId:player.id,emotion,phrase:window.DurakMoldovanVocabulary.say(kind)}})}}
 function openingReactionPlayer(player,reaction){if(!reaction)return player;return{...player,openingEmotion:reaction.emotion==="happy"?"laughing":reaction.emotion,openingLine:reaction.phrase,forceDialogue:true}}
 function renderOnlineOpeningFrame(s){
   let visual=onlineOpeningVisual,me=s.players.find(player=>player.id===myPlayerId);if(!visual||!me?.hand)return;
+  ui("turnTimer").hidden=true;
   let visiblePlayers=s.players.filter(player=>!player.left),others=visiblePlayers.filter(player=>player.id!==me.id),seats=window.DurakRoundTable.createTableLayout(visiblePlayers.map(player=>player.id),me.id),seatById=new Map(seats.map(seat=>[seat.playerId,seat])),selfReaction=visual.activeReaction?.playerId===me.id?visual.activeReaction:null,badge=ui("playerReaction");
   badge.textContent=selfReaction?.phrase||"";badge.className=`player-reaction ${selfReaction?.emotion||""}`;
   ui("opponents").innerHTML=others.map(player=>{let count=visual.dealt[player.id]||0,reaction=visual.activeReaction?.playerId===player.id?visual.activeReaction:null,state=visual.arrivals[player.id]||"waiting";return `<article data-player-id="${player.id}" style="${window.DurakRoundTable.seatStyle(seatById.get(player.id))}" class="bot-seat ${window.DurakAvatarArrival.arrivalClass(state)}">${window.DurakAvatarArrival.chairHTML()}${avatarHTML(openingReactionPlayer(player,reaction))}<div class="bot-info"><strong>${escapeOnlineHtml(player.name)}</strong><span>${count} cărți</span></div><div id="hand-${player.id}" class="hand bot-hand">${Array.from({length:count},()=>botCardHTML()).join("")}</div></article>`}).join("");
@@ -29,7 +30,7 @@ async function runOnlineOpening(s){
   let id=s.opening.id,run=++onlineOpeningRun,reactions=new Map(s.opening.reactions.map(reaction=>[reaction.playerId,reaction]));onlineOpeningVisual={id,running:true,completed:false,arrivals:Object.fromEntries(s.players.map(player=>[player.id,"waiting"])),dealt:Object.fromEntries(s.players.map(player=>[player.id,0])),dealtTotal:0,activeReaction:null,status:"Jucătorii vin la masă…"};document.body.classList.add("opening-active");renderOnlineOpeningFrame(s);
   let timeline=window.DurakOpening.createOpeningTimeline(s.players,{reactionFor:player=>reactions.get(player.id)?.emotion||"neutral"});
   for(let event of timeline){if(run!==onlineOpeningRun)return;let player=s.players.find(item=>item.id===event.playerId),mine=event.playerId===myPlayerId;if(event.type==="opening-start")continue;if(event.type==="player-enter"){onlineOpeningVisual.arrivals[event.playerId]=mine?"ready":"walking";onlineOpeningVisual.status=`${player.name} vine la masă…`;renderOnlineOpeningFrame(s);await waitOnline(mine?180:event.duration)}else if(event.type==="chair-pull"){if(!mine){onlineOpeningVisual.arrivals[event.playerId]="pulling-chair";onlineOpeningVisual.status=`${player.name} își trage scaunul…`;renderOnlineOpeningFrame(s);await waitOnline(event.duration)}}else if(event.type==="player-sit"){if(!mine){onlineOpeningVisual.arrivals[event.playerId]="sitting";onlineOpeningVisual.status=`${player.name} se așază la masă…`;renderOnlineOpeningFrame(s);await waitOnline(event.duration);onlineOpeningVisual.arrivals[event.playerId]="ready";renderOnlineOpeningFrame(s)}}else if(event.type==="player-reaction"){onlineOpeningVisual.activeReaction=reactions.get(event.playerId)||null;renderOnlineOpeningFrame(s);await waitOnline(520);onlineOpeningVisual.activeReaction=null;renderOnlineOpeningFrame(s)}else if(event.type==="deal-card"){onlineOpeningVisual.status=`Se împart cărțile: ${player.name} primește ${event.cardNumber}/6`;renderOnlineOpeningFrame(s);let card=mine?player.hand[event.cardNumber-1]:null;await animateOnlineDealCard(event.playerId,card);onlineOpeningVisual.dealt[event.playerId]++;onlineOpeningVisual.dealtTotal++;renderOnlineOpeningFrame(s)}}
-  if(run!==onlineOpeningRun)return;onlineOpeningVisual.running=false;onlineOpeningVisual.completed=true;document.body.classList.remove("opening-active");if(isHost&&onlineState?.opening?.id===id){delete onlineState.opening;sync()}else if(pendingOnlineState){onlineState=pendingOnlineState;pendingOnlineState=null;renderOnline()}else{onlineOpeningVisual.status="Ceremonia s-a terminat. Așteaptă gazda…";renderOnlineOpeningFrame(s)}
+  if(run!==onlineOpeningRun)return;onlineOpeningVisual.running=false;onlineOpeningVisual.completed=true;document.body.classList.remove("opening-active");if(isHost&&onlineState?.opening?.id===id){delete onlineState.opening;scheduleOnlineTurnTimeout();sync()}else if(pendingOnlineState){onlineState=pendingOnlineState;pendingOnlineState=null;renderOnline()}else{onlineOpeningVisual.status="Ceremonia s-a terminat. Așteaptă gazda…";renderOnlineOpeningFrame(s)}
 }
 function openLobby(){ui("mainMenu").hidden=true;ui("setup").hidden=true;ui("onlineLobby").hidden=false;ui("lobbyChoices").hidden=false;ui("joinArea").hidden=true;ui("publicArea").hidden=true;ui("roomArea").hidden=true;status("")}
 ui("singleMode").onclick=()=>{cleanPeer();ui("mainMenu").hidden=true;ui("setup").hidden=false};ui("multiMode").onclick=openLobby;
@@ -58,11 +59,14 @@ function drawLobby(){let list=onlineState?.lobby||[],view=window.DurakMultiplaye
 ui("copyCode").onclick=async()=>{try{await navigator.clipboard.writeText(room);status("Cod copiat!")}catch{status(`Cod: ${room}`)}};
 async function showPublicRooms(){if(!await window.DurakAuth?.requireAccount())return;ui("lobbyChoices").hidden=true;ui("joinArea").hidden=true;ui("publicArea").hidden=false;let box=ui("publicRooms");box.innerHTML="Se caută mese…";try{let rooms=await window.DurakAuth.listRooms();box.innerHTML=rooms.length?rooms.map(r=>`<div class="public-room"><div><b>${r.name}</b><br><span>${r.players}/${r.max_players} jucători</span></div><code>${r.code}</code><button data-room="${r.id}">Intră</button></div>`).join(""):`<p>Nu există mese. Creează tu prima masă!</p>`;box.querySelectorAll("button[data-room]").forEach(b=>b.onclick=async()=>{try{let c=await window.DurakAuth.joinRoom(b.dataset.room);ui("roomCode").value=c;ui("joinRoom").click()}catch(e){ui("publicStatus").textContent=e.message}})}catch(e){box.innerHTML="";ui("publicStatus").textContent=e.message}}
 if(ui("publicRoomsBtn"))ui("publicRoomsBtn").onclick=showPublicRooms;if(ui("refreshRooms"))ui("refreshRooms").onclick=showPublicRooms;if(ui("createPublicBtn"))ui("createPublicBtn").onclick=async()=>{if(!await window.DurakAuth?.requireAccount())return;publicHosting=true;ui("hostRoom").click()};
-ui("startOnline").onclick=()=>{if(!isHost||onlineState.lobby.length<2)return;if(publicHosting)window.DurakAuth?.closeRoom(room,"playing");onlineState=window.DurakMultiplayerSession.startGame(onlineState.lobby);if(!window.__DURAK_SKIP_ONLINE_OPENING)onlineState.opening=createOnlineOpening(onlineState.players);onlineActive=true;document.body.classList.add("online-active");ui("onlineLobby").hidden=true;sync()};
+ui("startOnline").onclick=()=>{if(!isHost||onlineState.lobby.length<2)return;if(publicHosting)window.DurakAuth?.closeRoom(room,"playing");onlineState=window.DurakMultiplayerSession.startGame(onlineState.lobby);if(!window.__DURAK_SKIP_ONLINE_OPENING)onlineState.opening=createOnlineOpening(onlineState.players);onlineActive=true;document.body.classList.add("online-active");ui("onlineLobby").hidden=true;scheduleOnlineTurnTimeout();sync()};
 function sync(){renderOnline();connections.forEach(c=>send(c,{type:"state",playerId:c.playerId,state:window.DurakMultiplayerSession.viewForPlayer(onlineState,c.playerId)}))}
 function playerById(id){return onlineState.players.find(player=>player.id===id)}
 function next(id){let players=onlineState.players,start=players.findIndex(player=>player.id===id);for(let n=1;n<=players.length;n++){let player=players[(start+n)%players.length];if(!player.out)return player.id}return id}
 function onlineTurnPlayerId(s=onlineState){return s.phase==="defend"?s.defender:s.phase==="attackBatch"?s.batchPlayer:s.attacker}
+function scheduleOnlineTurnTimeout(){clearTimeout(onlineTurnTimer);onlineTurnTimer=null;if(window.__DURAK_DISABLE_TURN_TIMER||!isHost||!onlineState?.players||onlineState.over||onlineState.opening){if(onlineState?.players)delete onlineState.turnDeadline;return}onlineState.turnDeadline=Date.now()+TURN_TIMEOUT_MS;onlineTurnTimer=setTimeout(autoPlayTimedOutTurn,TURN_TIMEOUT_MS)}
+function autoPlayTimedOutTurn(){onlineTurnTimer=null;let s=onlineState;if(!isHost||!s?.players||s.over||s.opening)return;let playerId=onlineTurnPlayerId(s),p=playerById(playerId),action=null;if(!p||p.out)return;if(s.phase==="attack"){let card=[...p.hand].sort((a,b)=>rank(a)-rank(b))[0];if(card)action={type:"card",id:card.id}}else if(s.phase==="attackBatch")action={type:"sendBatch"};else if(s.phase==="defend"){let open=s.battle.find(pair=>!pair.defense),card=open?[...p.hand].filter(item=>beatsOnline(item,open.attack)).sort((a,b)=>rank(a)-rank(b))[0]:null;action=card?{type:"card",id:card.id}:{type:"take"}}else if(s.phase==="add")action={type:"finish"};else if(s.phase==="taking")action={type:"finishTake"};if(action)processAction(playerId,action)}
+function showOnlineTurnClock(s){clearTimeout(turnClockTimer);turnClockTimer=null;let box=ui("turnTimer");if(!Number.isFinite(s?.turnDeadline)||s.opening||s.over){box.hidden=true;return}let tick=()=>{let seconds=Math.max(0,Math.ceil((s.turnDeadline-Date.now())/1000));box.hidden=false;box.textContent=`⏱ ${seconds}s`;box.className=`turn-timer${seconds<=10?" urgent":""}`;if(seconds>0)turnClockTimer=setTimeout(tick,250)};tick()}
 function onlineTableRanks(s=onlineState){return new Set(s.battle.flatMap(pair=>[pair.attack.rank,pair.defense?.rank].filter(Boolean)))}
 function canJoinOnlineAttack(s,p,c){return !!p&&!p.out&&p.id!==s.defender&&s.battle.length<s.limit&&onlineTableRanks(s).has(c.rank)}
 function canTransferOnline(s,p,c){if(s.phase!=="defend"||p.id!==s.defender||!s.battle.length||s.battle.some(pair=>pair.defense)||s.battle.length>=s.limit)return false;if(!s.battle.every(pair=>pair.attack.rank===c.rank))return false;let newDefender=next(s.defender),target=playerById(newDefender),targetCount=target?.hand?.length??target?.handCount??0;return newDefender!==s.defender&&!!target&&!target.out&&targetCount>=s.battle.length+1}
@@ -70,39 +74,40 @@ function onlinePlayableCardIds(s,p){if(!p||p.out||s.over)return null;if(s.phase=
 function onlineCardClass(card,playable){return `player-card${playable?playable.has(card.id)?" playable-card":" not-playable-card":""}`}
 function refillOnline(){let s=onlineState,attacker=playerById(s.attacker),defender=playerById(s.defender),order=[attacker,...s.players.filter(p=>p.id!==s.attacker&&p.id!==s.defender),defender];order.forEach(p=>{if(!p||p.out)return;while(p.hand.length<6&&s.deck.length)p.hand.push(s.deck.pop())});s.players.forEach(p=>{if(!s.deck.length&&!p.hand.length&&!p.out){p.out=true;s.winner.push(p.id)}})}
 function newOnlineRound(att){clearTimeout(onlineAttackBatchTimer);let s=onlineState,alive=s.players.filter(p=>!p.out);s.battle=[];delete s.batchPlayer;if(alive.length<=1){s.over=true;if(alive[0]&&!s.winner.includes(alive[0].id))s.winner.push(alive[0].id);return}if(playerById(att)?.out)att=next(att);s.attacker=att;s.defender=next(att);s.limit=Math.min(6,playerById(s.defender).hand.length);s.phase="attack"}
-function removeOnlinePlayer(playerId){let s=onlineState,p=playerById(playerId);if(!p||p.left)return;let wasAttacker=playerId===s.attacker,wasDefender=playerId===s.defender,wasBatchPlayer=s.batchPlayer===playerId;p.left=true;p.out=true;p.hand=[];if(wasAttacker||wasDefender||wasBatchPlayer){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null}let alive=s.players.filter(player=>!player.out);if(alive.length<=1){s.battle=[];delete s.batchPlayer;s.over=true;if(alive[0]&&!s.winner.includes(alive[0].id))s.winner.push(alive[0].id)}else if(wasAttacker||wasDefender){let newAttacker=wasAttacker?next(playerId):s.attacker;newOnlineRound(newAttacker);refillOnline()}else if(s.phase==="attackBatch"&&wasBatchPlayer){s.phase="defend";delete s.batchPlayer}sync()}
-function closeOnlineAttackBatch(){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;if(isHost&&onlineState?.phase==="attackBatch"){onlineState.phase="defend";delete onlineState.batchPlayer;sync()}}
-function scheduleOnlineAttackBatch(){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=setTimeout(closeOnlineAttackBatch,ONLINE_ATTACK_BATCH_MS)}
+function removeOnlinePlayer(playerId){let s=onlineState,p=playerById(playerId);if(!p||p.left)return;let wasAttacker=playerId===s.attacker,wasDefender=playerId===s.defender,wasBatchPlayer=s.batchPlayer===playerId;p.left=true;p.out=true;p.hand=[];if(wasAttacker||wasDefender||wasBatchPlayer){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null}let alive=s.players.filter(player=>!player.out);if(alive.length<=1){s.battle=[];delete s.batchPlayer;s.over=true;if(alive[0]&&!s.winner.includes(alive[0].id))s.winner.push(alive[0].id)}else if(wasAttacker||wasDefender){let newAttacker=wasAttacker?next(playerId):s.attacker;newOnlineRound(newAttacker);refillOnline()}else if(s.phase==="attackBatch"&&wasBatchPlayer){s.phase="defend";delete s.batchPlayer}scheduleOnlineTurnTimeout();sync()}
+function scheduleOnlineAttackBatch(){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null}
 function processAction(playerId,a){
   if(!isHost||onlineState.over||onlineState.opening)return;
-  let s=onlineState,p=playerById(playerId),reactionKind=null;if(!p)return;
+  let s=onlineState,p=playerById(playerId),reactionKind=null,changed=false;if(!p)return;
   if(a.type==="card"){
     let k=p.hand.findIndex(c=>c.id===a.id);if(k<0)return;let c=p.hand[k];
     if(s.phase==="attack"&&playerId===s.attacker){
       if(s.battle.length>=s.limit)return;
-      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack";
+      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack";changed=true;
     }else if(s.phase==="attackBatch"&&playerId===s.batchPlayer){
       if(s.battle.length>=s.limit)return;
       let hasDefense=s.battle.some(pair=>pair.defense),allowed=hasDefense?onlineTableRanks(s).has(c.rank):c.rank===s.battle[0].attack.rank;if(!allowed)return;
-      p.hand.splice(k,1);s.battle.push({attack:c});scheduleOnlineAttackBatch();
+      p.hand.splice(k,1);s.battle.push({attack:c});scheduleOnlineAttackBatch();changed=true;
     }else if(s.phase==="add"&&canJoinOnlineAttack(s,p,c)){
-      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack";
+      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack";changed=true;
     }else if(s.phase==="taking"&&canJoinOnlineAttack(s,p,c)){
-      p.hand.splice(k,1);s.battle.push({attack:c});reactionKind="attack";
+      p.hand.splice(k,1);s.battle.push({attack:c});reactionKind="attack";changed=true;
     }else if(s.phase==="defend"&&playerId===s.defender){
-      if(canTransferOnline(s,p,c)){let newDefender=next(s.defender);p.hand.splice(k,1);s.battle.push({attack:c});s.attacker=playerId;s.defender=newDefender;s.limit=Math.min(6,playerById(newDefender).hand.length);s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack"}
-      else{let o=s.battle.find(x=>!x.defense);if(!o||!beatsOnline(c,o.attack))return;p.hand.splice(k,1);o.defense=c;s.phase=s.battle.some(pair=>!pair.defense)?"defend":"add";reactionKind="defend"}
+      if(canTransferOnline(s,p,c)){let newDefender=next(s.defender);p.hand.splice(k,1);s.battle.push({attack:c});s.attacker=playerId;s.defender=newDefender;s.limit=Math.min(6,playerById(newDefender).hand.length);s.phase="attackBatch";s.batchPlayer=playerId;scheduleOnlineAttackBatch();reactionKind="attack";changed=true}
+      else{let o=s.battle.find(x=>!x.defense);if(!o||!beatsOnline(c,o.attack))return;p.hand.splice(k,1);o.defense=c;s.phase=s.battle.some(pair=>!pair.defense)?"defend":"add";reactionKind="defend";changed=true}
     }
   }else if(a.type==="sendBatch"&&playerId===s.batchPlayer&&s.phase==="attackBatch"){
-    clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;s.phase="defend";delete s.batchPlayer;
+    clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;s.phase="defend";delete s.batchPlayer;changed=true;
   }else if(a.type==="take"&&playerId===s.defender&&(s.phase==="defend"||s.phase==="add")&&s.battle.length){
-    clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;s.phase="taking";delete s.batchPlayer;reactionKind="take";
+    clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;s.phase="taking";delete s.batchPlayer;reactionKind="take";changed=true;
   }else if(a.type==="finishTake"&&playerId===s.attacker&&s.phase==="taking"){
-    let d=s.defender;playerById(d).hand.push(...s.battle.flatMap(x=>[x.attack,x.defense].filter(Boolean)));refillOnline();newOnlineRound(next(d));
+    let d=s.defender;playerById(d).hand.push(...s.battle.flatMap(x=>[x.attack,x.defense].filter(Boolean)));refillOnline();newOnlineRound(next(d));changed=true;
   }else if(a.type==="finish"&&playerId===s.attacker&&s.phase==="add"&&!s.battle.some(pair=>!pair.defense)){
-    let d=s.defender;refillOnline();newOnlineRound(d);reactionKind="finish";
+    let d=s.defender;refillOnline();newOnlineRound(d);reactionKind="finish";changed=true;
   }
+  if(!changed)return;
   if(reactionKind)reactOnline(playerId,reactionKind);
+  scheduleOnlineTurnTimeout();
   sync();
 }
 function allowLocalAction(now=Date.now()){localActionTimes=localActionTimes.filter(time=>now-time<ACTION_RATE_WINDOW_MS);if(localActionTimes.length>=ACTION_RATE_MAX){showAntiSpam();return false}localActionTimes.push(now);return true}
@@ -112,6 +117,7 @@ function renderOnline(){
   let s=isHost&&onlineState?.players?window.DurakMultiplayerSession.viewForPlayer(onlineState,myPlayerId):onlineState;
   if(!s?.players)return;
   if(s.opening){if(!onlineOpeningVisual||onlineOpeningVisual.id!==s.opening.id)runOnlineOpening(s);renderOnlineOpeningFrame(s);return}
+  showOnlineTurnClock(s);
   let reaction=s.reaction&&s.reaction.expiresAt>Date.now()?s.reaction:null;
   clearTimeout(reactionViewTimer);
   if(reaction)reactionViewTimer=setTimeout(renderOnline,Math.max(0,reaction.expiresAt-Date.now()+30));
