@@ -1,0 +1,9 @@
+.agents/
+tests/
+node_modules/
+package.json
+auth.js
+supabase-config.js
+supabase-setup.sql
+skills-lock.json
+vendor/supabase.js

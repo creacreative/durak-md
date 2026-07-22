@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Durak</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game">
+    <header>
+      <div>
+        <p class="eyebrow">JOC DE CĂRȚI</p>
+        <h1>DURAK</h1>
+      </div>
+      <button id="newGame" class="ghost">Joc nou</button>
+      <button id="skipBtn" class="skip-btn" hidden>SKIP ⏩</button>
+    </header>
+
+    <section class="round-arena" aria-label="Masă rotundă de joc">
+      <section class="table">
+        <div class="deck-zone">
+          <div id="deck" class="deck"><span id="deckCount">24</span></div>
+          <div id="trump" class="trump"></div>
+        </div>
+        <div id="battlefield" class="battlefield">
+          <div class="empty-table">Masa este liberă</div>
+        </div>
+        <div class="turn-panel">
+          <div id="status" class="status">Se împart cărțile…</div>
+          <button id="actionBtn" class="action" hidden></button>
+        </div>
+      </section>
+      <section id="opponents" class="opponents"></section>
+      <section class="you">
+        <div class="player-label"><span>Tu</span><b id="playerCount">6 cărți</b><i id="playerReaction" class="player-reaction"></i></div>
+        <div id="playerHand" class="hand"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="fx" class="fx" aria-hidden="true"></div>
+  <div id="mainMenu" class="modal setup-modal">
+    <div class="modal-card setup-card main-lobby-card">
+      <div class="result-icon">🃏</div><h2>Lobby Durak</h2>
+      <p>Alege-ți numele, apoi intră la masă.</p>
+      <label class="nickname-label" for="lobbyNickname">Nickname</label>
+      <input id="lobbyNickname" class="nickname-square" maxlength="16" placeholder="Nickname" value="Jucător" autocomplete="nickname" />
+      <div id="lobbyPlayers" class="lobby-player-list" aria-label="Jucători în lobby"><div class="lobby-player-row"><span class="lobby-player-avatar">J</span><b>Jucător</b><small>TU</small></div></div>
+      <div class="mode-buttons"><button id="singleMode" class="action">🤖 Singleplayer</button><button id="multiMode" class="action secondary">🌐 Multiplayer</button></div>
+    </div>
+  </div>
+  <div id="setup" class="modal setup-modal" hidden>
+    <div class="modal-card setup-card lobby-card">
+      <button id="singleBack" class="lobby-back">← Înapoi</button>
+      <div class="result-icon">🪆</div>
+      <h2>Pregătește masa</h2>
+      <p>Alege câți adversari ruși vrei la masă.</p>
+      <label for="botNumber">Număr de boți</label>
+      <div class="bot-picker">
+        <button id="lessBots" type="button">−</button><strong id="botNumber">3</strong><button id="moreBots" type="button">+</button>
+      </div>
+      <button id="startGame" class="action">Începe partida</button>
+    </div>
+  </div>
+  <div id="onlineLobby" class="modal setup-modal" hidden>
+    <div class="modal-card setup-card lobby-card">
+      <button id="lobbyBack" class="lobby-back">← Înapoi</button><div class="result-icon">🌐</div><h2>Multiplayer</h2>
+      <input id="onlineName" class="lobby-input" maxlength="16" placeholder="Numele tău" value="Jucător" />
+      <div id="lobbyChoices" class="mode-buttons"><button id="hostRoom" class="action">Creează cameră</button><button id="showJoin" class="action secondary">Intră cu un cod</button></div>
+      <div id="joinArea" hidden><input id="roomCode" class="lobby-input code-input" maxlength="8" placeholder="COD CAMERĂ" /><button id="joinRoom" class="action">Conectează-te</button></div>
+      <div id="publicArea" hidden></div>
+      <div id="roomArea" hidden><p>Codul camerei</p><button id="copyCode" class="room-code">--------</button><div id="onlinePlayers" class="online-players"></div><p id="networkStatus" class="network-status">Se conectează…</p><button id="startOnline" class="action" hidden>Pornește partida</button></div>
+    </div>
+  </div>
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card">
+      <div id="resultIcon" class="result-icon">🏆</div>
+      <h2 id="resultTitle">Ai câștigat!</h2>
+      <p id="resultText"></p>
+      <div id="standings" class="standings"></div>
+      <button id="playAgain" class="action">Mai joacă o dată</button>
+    </div>
+  </div>
+  <script src="vendor/peerjs.min.js"></script>
+  <script src="opening-sequence.js"></script>
+  <script src="avatar-arrival.js"></script>
+  <script src="round-table-layout.js"></script>
+  <script src="moldovan-vocabulary.js"></script>
+  <script src="multiplayer-reactions.js"></script>
+  <script src="multiplayer-session.js"></script>
+  <script src="game.js"></script>
+  <script src="lobby.js"></script>
+  <script src="online.js"></script>
+</body>
+</html>

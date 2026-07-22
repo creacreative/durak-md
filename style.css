@@ -1,0 +1,224 @@
+:root{--felt:#123d31;--felt2:#0a2b24;--gold:#e9b949;--cream:#f7f0df;--ink:#18201d;--red:#c53d4e}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 35%,#1d5a48,var(--felt2) 72%);color:var(--cream);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E")}
+.game{width:min(1180px,96vw);min-height:100vh;margin:auto;padding:22px 20px;display:grid;grid-template-rows:auto auto 1fr auto;gap:12px}header{display:flex;align-items:center;justify-content:space-between}h1{margin:-5px 0 0;font-family:Georgia,serif;font-size:clamp(32px,5vw,54px);letter-spacing:.16em;color:var(--gold);text-shadow:0 3px 14px #0008}.eyebrow{font-size:10px;letter-spacing:.42em;margin:0;opacity:.7}.ghost,.action{border:1px solid #ffffff3d;border-radius:999px;padding:11px 20px;background:#ffffff0e;color:white;font-weight:750;cursor:pointer;transition:.2s}.ghost:hover{background:#ffffff20}.player-label{display:flex;gap:10px;align-items:baseline;margin:2px 8px 8px}.player-label span{font-weight:800}.player-label b{opacity:.55;font-size:12px}.hand{display:flex;justify-content:center;min-height:136px;padding:5px 25px}.card{position:relative;width:86px;height:126px;margin-left:-20px;border-radius:9px;background:linear-gradient(135deg,#fff,#e8e4dc);box-shadow:0 8px 18px #001c;display:flex;align-items:center;justify-content:center;color:var(--ink);font-family:Georgia,serif;font-weight:700;font-size:32px;border:1px solid #fff;transition:transform .18s,filter .18s;user-select:none}.card:first-child{margin-left:0}.card.red{color:var(--red)}.card .corner{position:absolute;left:7px;top:5px;font-size:17px;line-height:.85;text-align:center}.card .corner.bottom{left:auto;top:auto;right:7px;bottom:5px;transform:rotate(180deg)}.player-card{cursor:pointer}.player-card:hover,.player-card.selected{transform:translateY(-13px) rotate(-1deg);filter:brightness(1.07)}.card.back{background:repeating-linear-gradient(45deg,#263c62 0 6px,#d5b45a 6px 9px);border:5px solid #eee;box-shadow:inset 0 0 0 2px #263c62,0 8px 18px #001c}.bot-hand .card{width:70px;height:103px}.table{min-height:260px;display:grid;grid-template-columns:130px 1fr 180px;align-items:center;background:#061f1938;border:1px solid #ffffff16;border-radius:38px;padding:18px;box-shadow:inset 0 0 45px #0018}.deck-zone{position:relative;height:150px}.deck{position:absolute;left:15px;top:25px;width:76px;height:112px;border-radius:9px;background:repeating-linear-gradient(45deg,#263c62 0 6px,#d5b45a 6px 9px);border:5px solid #eee;box-shadow:-5px 5px 0 #eee5,-9px 9px 0 #eee3}.deck span{position:absolute;inset:auto -10px -10px auto;background:var(--gold);color:#18201d;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-weight:900}.trump{position:absolute;left:53px;top:44px;transform:rotate(90deg);z-index:-1}.battlefield{min-height:210px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:17px}.pair{position:relative;width:112px;height:150px}.pair .card{position:absolute;margin:0;width:78px;height:114px}.pair .defense{left:29px;top:29px;transform:rotate(10deg)}.empty-table{opacity:.35;font-family:Georgia,serif;font-style:italic}.turn-panel{text-align:center}.status{font-family:Georgia,serif;font-size:19px;line-height:1.35;margin-bottom:15px}.action{background:var(--gold);color:#17221e;border:0;box-shadow:0 5px 18px #0005}.action:hover{transform:translateY(-2px);filter:brightness(1.08)}.modal{position:fixed;inset:0;background:#04120fdd;display:grid;place-items:center;z-index:10;backdrop-filter:blur(6px)}.modal[hidden]{display:none}.modal-card{text-align:center;background:#f6edda;color:#17221e;padding:42px;border-radius:25px;box-shadow:0 25px 80px #0009;width:min(390px,90vw)}.modal-card h2{font:700 34px Georgia,serif;margin:8px}.modal-card p{opacity:.7}.result-icon{font-size:55px}
+@media(max-width:700px){.game{padding:14px 6px}.table{grid-template-columns:82px 1fr;grid-template-rows:1fr auto;padding:8px;border-radius:24px}.turn-panel{grid-column:1/-1}.deck-zone{transform:scale(.78);transform-origin:left center}.card{width:65px;height:96px;margin-left:-25px;font-size:25px}.card .corner{font-size:13px}.hand{min-height:105px;padding-inline:20px}.bot-hand .card{width:52px;height:78px}.battlefield{gap:4px;min-height:160px}.pair{width:80px;height:115px}.pair .card{width:60px;height:88px}.pair .defense{left:18px;top:22px}.status{font-size:16px}.opponent .hand{min-height:85px}}
+
+/* Boris — adversar animat */
+.opponent{position:relative}.opponent-head{position:absolute;left:10px;top:-22px;z-index:3}.bot-avatar{position:relative;width:76px;height:78px;transition:.25s}.face{position:absolute;left:14px;top:10px;width:48px;height:51px;background:#d9a474;border-radius:45% 45% 50% 50%;border:2px solid #17221e;z-index:2}.hair{position:absolute;left:11px;top:3px;width:55px;height:27px;background:#39271f;border-radius:50% 50% 30% 30%;z-index:3;transform:rotate(-4deg)}.shoulders{position:absolute;left:3px;bottom:0;width:70px;height:28px;background:#7e2940;border-radius:45px 45px 5px 5px}.eye{position:absolute;top:20px;width:11px;height:7px;background:white;border-radius:50%;overflow:hidden}.eye.left{left:8px}.eye.right{right:8px}.eye i{display:block;width:5px;height:5px;background:#171b19;border-radius:50%;margin:1px;transition:.25s}.brow{position:absolute;top:14px;width:12px;height:2px;background:#35241d}.brow.left{left:7px}.brow.right{right:7px}.nose{position:absolute;left:21px;top:24px;width:6px;height:9px;border:solid #9a684d;border-width:0 0 2px 2px}.mouth{position:absolute;left:17px;top:38px;width:14px;height:5px;border-bottom:2px solid #703b39;border-radius:50%}.thought{position:absolute;left:67px;top:-8px;min-width:75px;padding:7px 11px;background:#fff;color:#19221f;border-radius:14px 14px 14px 3px;font:700 12px Georgia,serif;opacity:0;transform:scale(.7);transform-origin:left bottom;transition:.22s;white-space:nowrap;box-shadow:0 5px 14px #0005}.bot-avatar.thinking .thought,.bot-avatar.talking .thought{opacity:1;transform:scale(1)}.bot-avatar.thinking{animation:thinkBob .65s ease-in-out infinite alternate}.bot-avatar.thinking .eye i{transform:translate(4px,2px)}.bot-avatar.happy .mouth{height:8px;border-bottom-width:3px}.bot-avatar.worried .brow.left{transform:rotate(18deg)}.bot-avatar.worried .brow.right{transform:rotate(-18deg)}.bot-avatar.worried .mouth{border-bottom:0;border-top:2px solid #703b39}.bot-hand.peek .card{animation:peek 1s ease-in-out infinite alternate}.card{animation:cardIn .34s cubic-bezier(.2,.8,.2,1) both}.battlefield.pulse{animation:tablePulse .45s ease}.fx{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}.spark{position:absolute;font-style:normal;font-size:20px;animation:spark .85s ease-out forwards}
+@keyframes cardIn{from{opacity:0;transform:translateY(-25px) scale(.85)}to{opacity:1}}@keyframes peek{to{transform:translateY(10px) rotate(2deg)}}@keyframes thinkBob{to{transform:translateY(4px) rotate(1deg)}}@keyframes tablePulse{50%{filter:brightness(1.4);transform:scale(1.01)}}@keyframes spark{to{opacity:0;transform:translate(var(--x),var(--y)) rotate(180deg) scale(.4)}}
+@media(max-width:700px){.bot-avatar{transform:scale(.78);transform-origin:left bottom}.opponent-head{top:-15px}.opponent-head .player-label{display:none}}
+
+/* Masă din lemn și animații ambientale */
+body{background:#2a1a10 url("img/wood-table.png") center/cover fixed no-repeat}
+body:before{opacity:.42;background:radial-gradient(circle at 50% 42%,transparent 20%,#080300a6 100%);animation:lamplight 7s ease-in-out infinite alternate}
+body:after{content:"";position:fixed;inset:-20%;pointer-events:none;background:linear-gradient(115deg,transparent 38%,#ffd99314 49%,transparent 61%);animation:lightSweep 12s ease-in-out infinite;z-index:-1}
+.game{position:relative}.game:before{content:"";position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 120px #050100b8;z-index:-1}
+.table{background:radial-gradient(ellipse at center,#132f266b,#071511a6);border-color:#eac77c2c;box-shadow:inset 0 0 55px #0009,0 18px 36px #0005;backdrop-filter:blur(1px)}
+.opponent-head{animation:breathing 3.2s ease-in-out infinite}.eye{animation:blink 5s infinite}.eye.right{animation-delay:.06s}.hair:after{content:"";position:absolute;width:13px;height:8px;right:5px;top:1px;border-top:3px solid #624838;border-radius:50%;transform:rotate(20deg)}
+.deck{animation:deckFloat 2.8s ease-in-out infinite}.deck:hover{filter:brightness(1.15);transform:translateY(-5px) rotate(-1deg)}
+.trump{filter:drop-shadow(0 0 6px #f0bd49);animation:trumpGlow 1.8s ease-in-out infinite alternate}
+.hand .card:nth-child(1){animation-delay:.03s}.hand .card:nth-child(2){animation-delay:.08s}.hand .card:nth-child(3){animation-delay:.13s}.hand .card:nth-child(4){animation-delay:.18s}.hand .card:nth-child(5){animation-delay:.23s}.hand .card:nth-child(6){animation-delay:.28s}.hand .card:nth-child(7){animation-delay:.33s}.hand .card:nth-child(8){animation-delay:.38s}.hand .card:nth-child(9){animation-delay:.43s}.hand .card:nth-child(10){animation-delay:.48s}
+.pair{animation:pairLand .45s cubic-bezier(.16,1.35,.45,1) both}.pair:nth-child(2){animation-delay:.06s}.pair:nth-child(3){animation-delay:.12s}.pair:nth-child(4){animation-delay:.18s}.pair:nth-child(5){animation-delay:.24s}.pair:nth-child(6){animation-delay:.3s}.pair .defense{animation:defendDrop .42s cubic-bezier(.2,1.5,.5,1) both}
+.player-card:hover{box-shadow:0 18px 30px #000b,0 0 16px #e9b94988}.action{position:relative;overflow:hidden}.action:after{content:"";position:absolute;inset:-30%;background:linear-gradient(100deg,transparent 35%,#fff8 50%,transparent 65%);transform:translateX(-100%);animation:buttonShine 3s ease-in-out infinite}
+.status{animation:statusBreath 2.4s ease-in-out infinite}.empty-table:before{content:"♠  ♥  ♦  ♣";display:block;font-style:normal;font-size:25px;letter-spacing:8px;margin-bottom:8px;opacity:.45;animation:suitDance 3s ease-in-out infinite}
+@keyframes lamplight{to{opacity:.55}}@keyframes lightSweep{0%,30%{transform:translateX(-35%)}70%,100%{transform:translateX(35%)}}@keyframes breathing{50%{transform:translateY(2px) scale(1.015)}}@keyframes blink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.08)}}@keyframes deckFloat{50%{transform:translateY(-3px);box-shadow:-5px 9px 0 #eee5,-9px 13px 0 #eee3,0 13px 20px #0008}}@keyframes trumpGlow{to{filter:drop-shadow(0 0 13px #ffd66d)}}@keyframes pairLand{from{opacity:0;transform:translateY(-55px) rotate(-8deg) scale(.8)}to{opacity:1;transform:none}}@keyframes defendDrop{from{opacity:0;transform:translate(45px,-55px) rotate(28deg) scale(1.2)}to{opacity:1;transform:rotate(10deg)}}@keyframes buttonShine{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}@keyframes statusBreath{50%{text-shadow:0 0 14px #f3d88b88}}@keyframes suitDance{50%{transform:translateY(-4px);letter-spacing:11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* Boris caută vizibil cartea de atac */
+.bot-hand.choosing .card{animation:none;transition:transform .28s cubic-bezier(.2,1.4,.4,1),filter .28s,box-shadow .28s;filter:brightness(.72);transform:translateY(4px) scale(.96)}
+.bot-hand.choosing .card.considering{z-index:8;filter:brightness(1.22) saturate(1.15);transform:translateY(19px) scale(1.08) rotate(var(--tilt,2deg));box-shadow:0 13px 24px #000c,0 0 18px #ffd36a99}
+.bot-hand.choosing .card.rejected{animation:rejectCard .32s ease;filter:brightness(.55)}
+.bot-avatar.deep-think .brow.left{transform:rotate(-12deg)}.bot-avatar.deep-think .brow.right{transform:rotate(12deg)}.bot-avatar.deep-think .mouth{width:7px;height:7px;left:21px;border:2px solid #703b39;border-radius:50%}.bot-avatar.deep-think .eye i{animation:scanEyes .7s ease-in-out infinite alternate}
+@keyframes rejectCard{50%{transform:translateY(-2px) rotate(-5deg)}}@keyframes scanEyes{from{transform:translateX(0)}to{transform:translateX(4px)}}
+
+/* Masă cu mai mulți adversari */
+.opponents{display:flex;justify-content:center;align-items:flex-end;gap:clamp(4px,2vw,28px);min-height:142px;padding:4px 8px 0}.bot-seat{position:relative;width:min(170px,18vw);min-width:92px;height:138px;padding-top:5px;border-radius:18px 18px 0 0;transition:.3s}.bot-seat.attacker{background:linear-gradient(180deg,#e9b94925,transparent)}.bot-seat.defender{box-shadow:inset 0 0 0 2px #78bde555}.bot-seat.out{filter:grayscale(1);opacity:.45}.bot-seat .bot-avatar{position:absolute;left:50%;top:0;transform:translateX(-50%);animation:breathing 3.2s ease-in-out infinite}.bot-seat .hair{background:var(--hair,#39271f)}.bot-seat .shoulders{background:var(--shirt,#7e2940)}.bot-seat .shoulders.sweater{background:repeating-linear-gradient(90deg,var(--shirt) 0 8px,#ffffff18 8px 12px)}.bot-seat .shoulders.vest{border:5px solid #37281f;border-top:0}.bot-seat .shoulders.coat:after{content:"";position:absolute;left:50%;height:100%;border-left:2px solid #ffffff4d}.bot-seat .thought{left:55px;top:-13px;z-index:20}.bot-info{position:absolute;top:77px;left:0;right:0;text-align:center;z-index:4;text-shadow:0 2px 5px #000}.bot-info strong{display:block;color:#ffe3a1;font:700 14px Georgia,serif}.bot-info span{font-size:10px;opacity:.75}.bot-seat .bot-hand{position:absolute;left:0;right:0;bottom:0;min-height:56px;height:56px;padding:0;align-items:flex-end}.bot-seat .bot-hand .card{width:38px;height:54px;margin-left:-22px;border-width:3px;border-radius:5px}.bot-seat .bot-hand .card:first-child{margin-left:0}.bot-seat.attacker:before,.bot-seat.defender:before{position:absolute;right:5px;top:54px;z-index:10;padding:3px 6px;border-radius:8px;font-size:8px;font-weight:900;letter-spacing:.08em}.bot-seat.attacker:before{content:"ATACĂ";background:#e9b949;color:#17221e}.bot-seat.defender:before{content:"APĂRĂ";background:#75b9dc;color:#10232d}.setup-card label{display:block;margin:22px 0 8px;font-weight:800}.bot-picker{display:flex;justify-content:center;align-items:center;gap:22px;margin-bottom:25px}.bot-picker button{width:44px;height:44px;border:0;border-radius:50%;background:#17221e;color:white;font-size:25px;cursor:pointer}.bot-picker strong{font:700 42px Georgia,serif;min-width:45px}.setup-card .action{width:100%}
+@media(max-width:700px){.opponents{gap:1px;min-height:120px;padding-inline:0}.bot-seat{min-width:0;width:20%;height:118px}.bot-seat .bot-avatar{transform:translateX(-50%) scale(.65);transform-origin:center top}.bot-info{top:61px}.bot-info strong{font-size:10px}.bot-info span{font-size:8px}.bot-seat .bot-hand{height:43px;min-height:43px}.bot-seat .bot-hand .card{width:28px;height:41px;margin-left:-21px}.bot-seat .thought{left:42px;top:-20px;font-size:9px;padding:5px}.bot-seat.attacker:before,.bot-seat.defender:before{right:0;top:45px;font-size:6px;padding:2px 3px}}
+
+/* Mâinile și personajele stau nemișcate până începe o acțiune */
+.hand .card,.bot-seat .bot-avatar{animation:none}
+.bot-seat .bot-avatar.thinking{animation:none}.bot-seat .bot-avatar.thinking .face{animation:faceThink .65s ease-in-out infinite alternate}
+.bot-hand.choosing .card.considering{animation:none}
+@keyframes faceThink{to{transform:translateY(3px) rotate(1deg)}}
+
+/* Organizare clară: avatar, nume, apoi cărți */
+.opponents{min-height:168px;align-items:flex-start;padding-top:4px;gap:clamp(8px,2.2vw,32px)}
+.bot-seat{height:164px;width:min(180px,18vw);padding:0;background:linear-gradient(180deg,#0a09051f,transparent);border-radius:18px}
+.bot-seat .bot-avatar{top:2px}
+.bot-info{top:82px;left:8px;right:8px;min-height:35px;padding:4px 7px;background:#17120ddd;border:1px solid #f0c76a55;border-radius:9px;box-shadow:0 4px 10px #0008;text-shadow:none;z-index:12;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.bot-info strong{font-size:14px;color:#ffe3a1;overflow:hidden;text-overflow:ellipsis}.bot-info span{font-size:10px;color:#fff;opacity:.72}
+.bot-seat .bot-hand{bottom:0;height:46px;min-height:46px;z-index:5}.bot-seat .bot-hand .card{width:38px;height:54px}
+.bot-seat.attacker:before,.bot-seat.defender:before{right:4px;top:5px;z-index:15;box-shadow:0 3px 8px #0008}
+.bot-seat.attacker{background:linear-gradient(180deg,#e9b9492b,transparent 75%)}.bot-seat.defender{box-shadow:inset 0 0 0 2px #78bde577}
+@media(max-width:700px){.opponents{min-height:140px;gap:3px}.bot-seat{height:137px}.bot-seat .bot-avatar{top:0}.bot-info{top:65px;left:1px;right:1px;min-height:31px;padding:3px 2px;display:block}.bot-info strong{font-size:10px;line-height:12px}.bot-info span{display:block;font-size:8px;line-height:10px}.bot-seat .bot-hand{height:39px;min-height:39px}.bot-seat.attacker:before,.bot-seat.defender:before{top:2px;right:1px;font-size:6px}}
+
+/* Replici mai ușor de citit */
+.bot-seat .thought{min-width:125px;max-width:165px;white-space:normal;text-align:center;line-height:1.3;padding:9px 12px;font-size:12px;transition:opacity .28s,transform .28s}
+@media(max-width:700px){.bot-seat .thought{min-width:92px;max-width:115px;font-size:9px;line-height:1.25;padding:6px 7px}}
+
+/* Baloanele apar deasupra capului, fără să acopere masa */
+.bot-seat .thought{left:50%;top:auto;bottom:76px;z-index:40;transform:translateX(-50%) scale(.72);transform-origin:center bottom;border-radius:14px 14px 14px 3px;box-shadow:0 7px 18px #000a}
+.bot-seat .thought:after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+.bot-seat .bot-avatar.thinking .thought,.bot-seat .bot-avatar.talking .thought{transform:translateX(-50%) scale(1)}
+@media(max-width:700px){.bot-seat .thought{bottom:70px}.bot-seat:first-child .thought{left:65%}.bot-seat:last-child .thought{left:35%}}
+
+/* Reacții și clasament */
+.skip-btn{position:fixed;right:22px;bottom:22px;z-index:30;border:2px solid #fff7;border-radius:999px;padding:13px 22px;background:#d94841;color:#fff;font-weight:950;letter-spacing:.08em;box-shadow:0 8px 28px #0009;cursor:pointer;animation:skipPulse 1.6s ease-in-out infinite}.bot-avatar.laughing .mouth{left:15px;top:36px;width:18px;height:12px;background:#571e24;border:2px solid #381416;border-radius:3px 3px 50% 50%;animation:laughMouth .28s infinite alternate}.bot-avatar.laughing .eye{height:3px;background:transparent;border-top:2px solid #30221c}.bot-avatar.angry .brow.left{transform:rotate(22deg)}.bot-avatar.angry .brow.right{transform:rotate(-22deg)}.bot-avatar.angry .face{background:#d98a72;animation:angryShake .22s 4}.bot-avatar.angry .mouth{border-bottom:0;border-top:3px solid #703b39;transform:rotate(-4deg)}.bot-avatar.sad .brow.left{transform:rotate(-18deg)}.bot-avatar.sad .brow.right{transform:rotate(18deg)}.bot-avatar.sad .mouth{border-bottom:0;border-top:2px solid #703b39}.bot-avatar.panic .eye{height:11px}.bot-avatar.panic .mouth{width:10px;height:10px;left:19px;border:2px solid #703b39;border-radius:50%}.bot-avatar.panic .face{animation:panicBob .3s infinite alternate}.standings{display:grid;gap:7px;margin:18px 0;text-align:left}.standing-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;padding:9px 12px;border-radius:10px;background:#17221e0d}.standing-row:first-child{background:#e9b94942}.standing-row:last-child{background:#c53d4e22}.standing-row b{font-family:Georgia,serif}.standing-row span:last-child{font-size:11px;font-weight:900}.medal{font-size:20px;text-align:center}
+@keyframes skipPulse{50%{transform:scale(1.06);box-shadow:0 8px 32px #e44b3e99}}@keyframes laughMouth{to{transform:scaleY(.75)}}@keyframes angryShake{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}@keyframes panicBob{to{transform:translateY(2px)}}
+/* Fețe, coafuri și tatuaje generate aleator */
+.bot-seat .face{background:var(--skin,#d9a474)}.bot-seat .hair{background:var(--hair,#39271f)}
+.bot-avatar.buzz-hair .hair{height:16px;top:7px;border-radius:55% 55% 15% 15%}.bot-avatar.curly-hair .hair{height:25px;top:0;background:radial-gradient(circle at 7px 8px,var(--hair) 0 8px,transparent 9px),radial-gradient(circle at 20px 6px,var(--hair) 0 10px,transparent 11px),radial-gradient(circle at 36px 7px,var(--hair) 0 10px,transparent 11px),radial-gradient(circle at 49px 9px,var(--hair) 0 8px,transparent 9px)}.bot-avatar.mohawk-hair .hair{left:29px;top:-3px;width:18px;height:32px;border-radius:70% 20% 35% 20%;transform:skew(-8deg)}.bot-avatar.long-hair .hair{left:9px;top:2px;width:59px;height:52px;border-radius:48% 48% 20% 20%}.bot-avatar.long-hair .face{z-index:4}.bot-avatar.bald-hair .hair{display:none}.bot-avatar.bald-hair .face:before{content:"";position:absolute;left:7px;top:3px;width:30px;height:7px;border-top:2px solid #ffffff40;border-radius:50%}.bot-avatar.side-hair .hair{left:8px;width:60px;height:25px;border-radius:60% 30% 50% 10%;transform:rotate(-10deg)}
+.bot-avatar.narrow-eyes .eye{height:4px;top:21px;transform:rotate(-3deg)}.bot-avatar.narrow-eyes .eye.right{transform:rotate(3deg)}.bot-avatar.wide-eyes .eye{height:11px;width:12px;top:18px}.bot-avatar.wide-eyes .eye i{margin:3px}
+.facial-hair{position:absolute;z-index:5}.bot-avatar.mustache .facial-hair{left:15px;top:33px;width:18px;height:6px;background:var(--hair);border-radius:60% 20% 60% 20%;transform:rotate(2deg)}.bot-avatar.beard .facial-hair{left:9px;top:35px;width:30px;height:18px;background:var(--hair);border-radius:20% 20% 50% 50%;opacity:.92}.bot-avatar.goatee .facial-hair{left:19px;top:42px;width:10px;height:12px;background:var(--hair);clip-path:polygon(0 0,100% 0,50% 100%)}
+.tattoo{position:absolute;z-index:8;font:bold 8px Georgia;color:#263a55;opacity:.78}.tattoo.none{display:none}.tattoo.ink-left{left:3px;top:28px;transform:rotate(-15deg)}.tattoo.ink-right{right:2px;top:28px;transform:rotate(15deg)}
+
+/* Barba ocolește gura, astfel expresiile rămân clare */
+.bot-avatar .mouth{z-index:12}
+.bot-avatar.beard .facial-hair{left:8px;top:31px;width:32px;height:20px;background:transparent;border:0;border-bottom:8px solid var(--hair);border-radius:0 0 48% 48%;opacity:.95;z-index:6}
+.bot-avatar.beard .facial-hair:before,.bot-avatar.beard .facial-hair:after{content:"";position:absolute;top:0;width:8px;height:14px;background:var(--hair);border-radius:40% 35% 55% 50%}
+.bot-avatar.beard .facial-hair:before{left:0;transform:rotate(-8deg)}.bot-avatar.beard .facial-hair:after{right:0;transform:rotate(8deg)}
+.bot-avatar.beard.laughing .mouth{left:15px;top:35px;width:18px;height:11px;border-radius:4px 4px 50% 50%;box-shadow:0 0 0 2px var(--skin)}
+.bot-avatar.beard.angry .mouth,.bot-avatar.beard.sad .mouth{box-shadow:0 -2px 0 var(--skin)}
+
+/* Meniu și lobby multiplayer */
+.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}.mode-buttons .action{width:100%;padding:14px}.action.secondary{background:#223f52;color:#fff}.lobby-card{position:relative}.lobby-back{position:absolute;left:18px;top:18px;border:0;background:transparent;cursor:pointer;color:#17221e;font-weight:800}.lobby-input{width:100%;border:2px solid #17221e22;border-radius:12px;padding:13px 14px;font:700 16px inherit;margin:10px 0;text-align:center}.code-input{text-transform:uppercase;letter-spacing:.15em}.room-code{border:2px dashed #17221e55;border-radius:12px;background:#fff8;padding:12px 25px;font:900 27px monospace;letter-spacing:.14em;cursor:pointer}.online-players{display:grid;gap:6px;margin:16px 0}.online-player{display:flex;justify-content:space-between;padding:8px 12px;border-radius:9px;background:#17221e0d}.network-status{font-size:12px;min-height:18px}.network-status.error{color:#b92e39}.network-status.ok{color:#247044}@media(max-width:500px){.mode-buttons{grid-template-columns:1fr}}
+.account-bar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0 2px;font-size:12px}.account-bar .ghost{color:#17221e;border-color:#17221e33;padding:7px 12px}.auth-card{position:relative}.auth-card .action{width:100%;margin-top:8px}.auth-card select{appearance:auto}.text-button{display:block;width:100%;border:0;background:transparent;color:#234f70;font-weight:750;cursor:pointer;padding:8px}.public-action{background:#32765d}.public-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0}.public-head .ghost{color:#17221e;border-color:#17221e33;padding:7px 11px}.public-rooms{display:grid;gap:8px;max-height:260px;overflow:auto}.public-room{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;text-align:left;background:#17221e0b;border:1px solid #17221e17;border-radius:12px;padding:10px}.public-room span{font-size:11px;opacity:.65}.public-room button{border:0;border-radius:8px;background:#e9b949;color:#17221e;font-weight:900;padding:8px 11px;cursor:pointer}
+.auth-gate{z-index:30}.auth-gate .modal-card{width:min(430px,92vw)}
+
+/* Lobby fără autentificare */
+.main-lobby-card{width:min(430px,92vw)}.nickname-label{margin:18px 0 7px!important;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#17221eaa}.nickname-square{display:block;width:92px;height:92px;margin:0 auto 16px;border:3px solid #e9b949;border-radius:18px;background:#fffaf0;color:#17221e;text-align:center;font:800 14px Georgia,serif;outline:none;box-shadow:0 10px 25px #39260f20;transition:.2s}.nickname-square:focus{transform:translateY(-3px);border-color:#234f70;box-shadow:0 14px 28px #234f7030}.lobby-player-list{display:grid;gap:7px;margin:12px 0 18px}.lobby-player-row{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;padding:8px 12px;border:1px solid #17221e17;border-radius:13px;background:#17221e0a;text-align:left}.lobby-player-avatar{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#e9b949;color:#17221e;font-weight:900}.lobby-player-row small{padding:4px 7px;border-radius:999px;background:#234f70;color:white;font-size:9px;font-weight:900;letter-spacing:.08em}
+
+/* Cărțile pot fi prinse cu mouse-ul și aruncate pe masă */
+.player-card[draggable="true"]{cursor:grab;touch-action:none}.player-card[draggable="true"]:active{cursor:grabbing}.player-card.dragging{opacity:.35;transform:translateY(-28px) rotate(5deg) scale(.95)}
+.battlefield{position:relative}.battlefield.drop-ready{outline:2px dashed #e9b94988;outline-offset:7px;background:#e9b9490d;transition:.18s}.battlefield.drag-over{outline-color:#ffe18a;outline-width:4px;background:#e9b94925;box-shadow:inset 0 0 45px #e9b94922}.battlefield.drag-over:after{content:"DĂ DRUMUL CĂRȚII";position:absolute;padding:8px 14px;border-radius:999px;background:#e9b949;color:#17221e;font-size:11px;font-weight:900;letter-spacing:.08em;pointer-events:none}
+
+/* Botul aruncă vizibil cartea din propria mână spre masă */
+.bot-thrown-card{position:fixed;z-index:80;width:78px;height:114px;margin:0;pointer-events:none;animation:botThrowCard var(--throw-duration,900ms) linear forwards;filter:drop-shadow(0 14px 13px #0009);will-change:transform,opacity;backface-visibility:hidden}.bot-thrown-card.relaxed-throw{filter:drop-shadow(0 12px 14px #0007)}.bot-thrown-card.stress-throw{filter:drop-shadow(0 17px 10px #000b) saturate(1.12)}
+.bot-landing .pair{animation:none!important}.bot-landing .pair .card:not(.defense){animation:none!important}
+@keyframes botThrowCard{0%{opacity:.3;transform:translate3d(0,0,0) rotate(-12deg) scale(.78)}12%{opacity:1}25%{transform:translate3d(var(--throw-x25),var(--throw-y25),0) rotate(-7deg) scale(.9)}50%{transform:translate3d(var(--throw-x50),var(--throw-y50),0) rotate(-1deg) scale(1)}75%{transform:translate3d(var(--throw-x75),var(--throw-y75),0) rotate(4deg) scale(1.02)}100%{opacity:1;transform:translate3d(var(--throw-x),var(--throw-y),0) rotate(3deg) scale(1)}}
+
+/* Ceremonia de început: sosirea la masă și împărțirea cărților */
+.opening-active .bot-seat,.opening-active .you{opacity:0;pointer-events:none;filter:blur(5px);transform:translateY(-55px) scale(.82)}
+.opening-active .bot-seat:nth-child(even){transform:translate(70px,-35px) rotate(5deg) scale(.82)}
+.opening-active .bot-seat:nth-child(odd){transform:translate(-70px,-35px) rotate(-5deg) scale(.82)}
+.opening-active .bot-seat.opening-arrived,.opening-active .you.opening-arrived{opacity:1;filter:none;transform:none;transition:opacity .42s ease,transform .55s cubic-bezier(.16,1.35,.42,1),filter .35s}
+.opening-active .bot-seat.opening-arrived{animation:seatWelcome .5s cubic-bezier(.16,1.4,.45,1)}
+.player-label{position:relative}.player-reaction{display:inline-block;max-width:190px;margin-left:10px;padding:5px 9px;border-radius:999px;background:#f5ead7;color:#271b13;font:700 11px Georgia,serif;opacity:0;transform:translateY(8px);transition:.25s}.player-reaction:not(:empty){opacity:1;transform:none}.player-reaction.laughing{background:#ffe08a}.player-reaction.angry{background:#ef9a86}.player-reaction.thinking{background:#d8e6ea}
+.opening-dealt-card{position:fixed;z-index:120;width:65px;height:96px;margin:0;pointer-events:none;animation:openingDeal .26s cubic-bezier(.22,.78,.28,1) forwards;filter:drop-shadow(0 13px 12px #000b);will-change:transform,opacity}.opening-dealt-card.back{border:5px solid #eee;background:repeating-linear-gradient(45deg,#263c62 0 6px,#d5b45a 6px 9px)}
+@keyframes seatWelcome{0%{filter:brightness(1.5)}55%{transform:translateY(7px) scale(1.04)}100%{filter:none;transform:none}}
+@keyframes openingDeal{0%{opacity:.35;transform:translate3d(0,0,0) rotate(-18deg) scale(.7)}45%{opacity:1;transform:translate3d(var(--deal-mid-x),var(--deal-arc),0) rotate(7deg) scale(1.03)}100%{opacity:1;transform:translate3d(var(--deal-x),var(--deal-y),0) rotate(-3deg) scale(.9)}}
+@media(max-width:700px){.opening-active .bot-seat:nth-child(n){transform:translateY(-35px) scale(.65)}.opening-active .bot-seat.opening-arrived{transform:none}.player-reaction{display:block;margin:5px auto 0;max-width:150px}.opening-dealt-card{width:52px;height:78px}}
+
+/* Personaj full-body cât merge spre masă */
+.walking-body{display:none;position:absolute;left:5px;top:61px;width:66px;height:88px;z-index:1;transform-origin:center top}
+.walking-shadow{position:absolute;left:5px;bottom:-5px;width:56px;height:13px;border-radius:50%;background:#333a;box-shadow:0 2px 7px #1119;filter:blur(1px);z-index:-2;transform:scaleX(1.08)}
+.walking-torso{position:absolute;left:9px;top:0;width:48px;height:43px;background:linear-gradient(90deg,#0002,var(--shirt) 18% 82%,#0003);border:2px solid #17221e;border-radius:10px 10px 7px 7px}
+.walking-torso:after{content:"";position:absolute;left:50%;top:0;height:100%;border-left:2px solid #ffffff38}
+.walking-arm{position:absolute;top:3px;width:12px;height:46px;border:2px solid #17221e;border-radius:8px;background:linear-gradient(var(--shirt) 0 58%,var(--skin) 59%);transform-origin:center 5px;z-index:-1}
+.walking-arm.left{left:1px}.walking-arm.right{right:1px}
+.walking-leg{position:absolute;top:38px;width:17px;height:49px;border:2px solid #17221e;border-radius:4px 4px 8px 8px;background:#283444;transform-origin:center 3px}
+.walking-leg.left{left:15px}.walking-leg.right{right:15px}
+.walking-leg i{position:absolute;left:-3px;bottom:-4px;width:22px;height:10px;border:2px solid #17221e;border-radius:8px 9px 4px 4px;background:#231a16}
+.opening-active .bot-seat.arrival-walking{--walk-start:-150px;opacity:1;filter:none;transform:none;z-index:35;animation:fullBodyApproach .9s linear both}
+.opening-active .bot-seat.arrival-walking:nth-child(even){--walk-start:150px}
+.opening-active .bot-seat.arrival-walking .bot-avatar{top:-5px;height:151px;transform:translateX(-50%) scale(1.08);transform-origin:center top;z-index:30}
+.opening-active .bot-seat.arrival-walking .walking-body{display:block;animation:walkingBob .3s ease-in-out infinite alternate}
+.opening-active .bot-seat.arrival-walking .shoulders,.opening-active .bot-seat.arrival-pulling-chair .shoulders,.opening-active .bot-seat.arrival-sitting .shoulders{display:none}
+.opening-active .bot-seat.arrival-walking .walking-leg.left,.opening-active .bot-seat.arrival-walking .walking-arm.right{animation:limbForward .34s ease-in-out infinite alternate}
+.opening-active .bot-seat.arrival-walking .walking-leg.right,.opening-active .bot-seat.arrival-walking .walking-arm.left{animation:limbBack .34s ease-in-out infinite alternate}
+.opening-active .bot-seat.arrival-walking .bot-info,.opening-active .bot-seat.arrival-walking .bot-hand{opacity:0}
+.opening-active .bot-seat.arrival-seated{opacity:1;filter:none;transform:none;animation:sitAtTable .18s ease-out both}
+.opening-active .bot-seat.arrival-ready{opacity:1;filter:none;transform:none;animation:none}
+@keyframes fullBodyApproach{0%{opacity:0;transform:translateX(var(--walk-start)) scale(.88)}12%{opacity:1}100%{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes walkingBob{to{transform:translateY(-4px)}}
+@keyframes limbForward{from{transform:rotate(-25deg)}to{transform:rotate(25deg)}}
+@keyframes limbBack{from{transform:rotate(25deg)}to{transform:rotate(-25deg)}}
+@keyframes sitAtTable{from{transform:translateY(-8px) scale(1.04)}to{transform:none}}
+@media(max-width:700px){.opening-active .bot-seat.arrival-walking:nth-child(n){--walk-start:-80px;transform:none;animation:fullBodyApproach .9s linear both}.opening-active .bot-seat.arrival-walking:nth-child(even){--walk-start:80px}.opening-active .bot-seat.arrival-walking .bot-avatar{transform:translateX(-50%) scale(.76);transform-origin:center top}.walking-body{top:59px}}
+
+/* Scaun tras de sub masă și animația de așezare */
+.avatar-chair{display:none;position:absolute;left:50%;top:22px;width:76px;height:118px;transform:translateX(-50%);transform-origin:center bottom;z-index:1;filter:drop-shadow(0 7px 5px #0008)}
+.chair-back{position:absolute;left:10px;top:0;width:56px;height:69px;border:6px solid #4a2815;border-bottom-width:8px;border-radius:14px 14px 5px 5px;background:repeating-linear-gradient(90deg,#6d3b1d 0 7px,#3f210f 7px 11px);box-shadow:inset 0 0 0 3px #9a6334}
+.chair-back:after{content:"";position:absolute;left:7px;right:7px;top:13px;height:8px;border-radius:5px;background:#b27a42;box-shadow:0 20px 0 #805029}
+.chair-seat{position:absolute;left:5px;top:63px;width:66px;height:17px;border:4px solid #351b0d;border-radius:7px;background:linear-gradient(#a96f37,#633516);transform:perspective(60px) rotateX(12deg);z-index:3}
+.chair-leg{position:absolute;top:76px;width:8px;height:39px;border:2px solid #2c160b;border-radius:3px;background:linear-gradient(90deg,#3b1d0e,#7b4926);transform-origin:top center}
+.chair-leg.back-left{left:14px;transform:rotate(7deg)}.chair-leg.back-right{right:14px;transform:rotate(-7deg)}.chair-leg.front-left{left:23px;height:42px;z-index:4;transform:rotate(4deg)}.chair-leg.front-right{right:23px;height:42px;z-index:4;transform:rotate(-4deg)}
+.opening-active .bot-seat.arrival-walking{animation:none!important;transform:none!important}
+.opening-active .bot-seat.arrival-walking .avatar-chair{display:block;opacity:.32;transform:translate(-50%,27px) scale(.72)}
+.opening-active .bot-seat.arrival-walking .bot-avatar{animation:walkingAvatarApproach .9s linear both}
+.opening-active .bot-seat.arrival-pulling-chair,.opening-active .bot-seat.arrival-sitting{opacity:1;filter:none;transform:none;z-index:35;animation:none}
+.opening-active .bot-seat.arrival-pulling-chair .avatar-chair,.opening-active .bot-seat.arrival-sitting .avatar-chair,.bot-seat.arrival-ready .avatar-chair{display:block}
+.opening-active .bot-seat.arrival-pulling-chair .avatar-chair{animation:pullChairFromTable .45s cubic-bezier(.2,.75,.3,1) both}
+.opening-active .bot-seat.arrival-pulling-chair .bot-avatar,.opening-active .bot-seat.arrival-sitting .bot-avatar{top:-5px;height:151px;transform:translateX(-50%) scale(1.08);transform-origin:center top;z-index:4}
+.opening-active .bot-seat.arrival-pulling-chair .walking-body,.opening-active .bot-seat.arrival-sitting .walking-body{display:block}
+.opening-active .bot-seat.arrival-pulling-chair .walking-arm.right{animation:reachForChair .45s ease-in-out both}.opening-active .bot-seat.arrival-pulling-chair .walking-torso{animation:turnForChair .45s ease-in-out both}
+.opening-active .bot-seat.arrival-sitting .avatar-chair{transform:translate(-50%,5px)}
+.opening-active .bot-seat.arrival-sitting .bot-avatar{animation:sitOnChair .5s cubic-bezier(.35,.05,.2,1) both}
+.opening-active .bot-seat.arrival-sitting .walking-leg.left{animation:bendLeftLeg .5s ease-in both}.opening-active .bot-seat.arrival-sitting .walking-leg.right{animation:bendRightLeg .5s ease-in both}
+.opening-active .bot-seat.arrival-pulling-chair .bot-info,.opening-active .bot-seat.arrival-pulling-chair .bot-hand,.opening-active .bot-seat.arrival-sitting .bot-info,.opening-active .bot-seat.arrival-sitting .bot-hand{opacity:0}
+.bot-seat.arrival-ready .avatar-chair{opacity:.92;transform:translate(-50%,2px) scale(.9)}.bot-seat.arrival-ready .bot-avatar{z-index:4}
+@keyframes walkingAvatarApproach{0%{opacity:0;transform:translateX(calc(-50% + var(--walk-start))) scale(.95)}12%{opacity:1}100%{opacity:1;transform:translateX(-50%) scale(1.08)}}
+@keyframes pullChairFromTable{0%{opacity:.35;transform:translate(-50%,29px) scale(.72)}35%{opacity:1;transform:translate(-50%,18px) scale(.86) rotate(-2deg)}100%{opacity:1;transform:translate(-50%,5px) scale(1)}}
+@keyframes reachForChair{0%{transform:rotate(0)}45%,100%{transform:rotate(-68deg) translateY(5px)}}
+@keyframes turnForChair{50%,100%{transform:skewX(-8deg) rotate(-3deg)}}
+@keyframes sitOnChair{0%{transform:translateX(-50%) translateY(0) scale(1.08)}45%{transform:translateX(-50%) translateY(15px) scale(1.05)}100%{transform:translateX(-50%) translateY(31px) scale(.96)}}
+@keyframes bendLeftLeg{to{transform:translate(7px,-7px) rotate(62deg);height:35px}}@keyframes bendRightLeg{to{transform:translate(-7px,-7px) rotate(-62deg);height:35px}}
+@media(max-width:700px){.avatar-chair{transform:translateX(-50%) scale(.75)}.opening-active .bot-seat.arrival-walking .bot-avatar{animation:walkingAvatarApproachMobile .9s linear both}.opening-active .bot-seat.arrival-pulling-chair .bot-avatar,.opening-active .bot-seat.arrival-sitting .bot-avatar{transform:translateX(-50%) scale(.76)}.bot-seat.arrival-ready .avatar-chair{transform:translate(-50%,-3px) scale(.67)}@keyframes walkingAvatarApproachMobile{0%{opacity:0;transform:translateX(calc(-50% + var(--walk-start))) scale(.66)}12%{opacity:1}100%{opacity:1;transform:translateX(-50%) scale(.76)}}}
+
+/* Masa rotundă: fiecare jucător are un loc radial, cu textul și cărțile drepte */
+.game{display:block;width:100%;max-width:none;padding-inline:clamp(7px,2vw,20px)}
+.game>header{width:min(1180px,100%);margin-inline:auto}
+.round-arena{position:relative;width:min(880px,90vw,calc(100vh - 145px));aspect-ratio:1;margin:8px 0 105px 50%;transform:translateX(-50%);isolation:isolate}
+.round-arena .table{position:absolute;inset:12%;display:block;min-height:0;padding:0;border:10px solid #5b3219;border-radius:50%;background:radial-gradient(circle at 48% 43%,#214f40 0,#10372d 58%,#071b16 100%);box-shadow:inset 0 0 0 5px #b27a4247,inset 0 0 70px #000b,0 22px 38px #000a;overflow:visible;z-index:2}
+.round-arena .table:before{content:"";position:absolute;inset:-15px;border:4px solid #2b160b;border-radius:50%;box-shadow:inset 0 0 0 3px #d19a5760;pointer-events:none}
+.round-arena .opponents{position:absolute;inset:0;display:block;min-height:0;padding:0;pointer-events:none;z-index:8}
+.round-arena .bot-seat{position:absolute;left:var(--seat-x);top:var(--seat-y);width:clamp(118px,16vw,154px);min-width:0;height:145px;padding-top:5px;transform:translate(-50%,-50%);pointer-events:auto}
+.round-arena .you{position:absolute;left:var(--seat-x);top:var(--seat-y);width:min(570px,68%);margin:0;transform:translate(-50%,-4%);z-index:9;text-align:center}
+.opening-active .round-arena .you.opening-arrived{transform:translate(-50%,-4%)!important}
+.round-arena .you .player-label{justify-content:center}
+.round-arena .deck-zone{position:absolute;left:9%;top:50%;width:105px;height:150px;transform:translate(-50%,-50%) scale(.78);z-index:4}
+.round-arena .battlefield{position:absolute;left:50%;top:45%;width:58%;height:55%;min-height:0;transform:translate(-50%,-50%);align-content:center;overflow:visible;z-index:3}
+.round-arena .turn-panel{position:absolute;left:50%;bottom:7%;width:62%;transform:translateX(-50%);z-index:7}
+.round-arena .status{margin-bottom:8px;padding:6px 10px;border-radius:14px;background:#071c17aa;text-shadow:0 2px 5px #000;font-size:clamp(14px,2vw,19px)}
+.round-arena .bot-info{position:absolute;z-index:13}
+
+/* Intrarea urmează raza locului; scaunul iese dinspre centrul mesei */
+.opening-active .round-arena .bot-seat.arrival-walking,
+.opening-active .round-arena .bot-seat.arrival-pulling-chair,
+.opening-active .round-arena .bot-seat.arrival-sitting,
+.opening-active .round-arena .bot-seat.arrival-seated,
+.opening-active .round-arena .bot-seat.arrival-ready,
+.opening-active .round-arena .bot-seat.opening-arrived{transform:translate(-50%,-50%)!important}
+.opening-active .round-arena .bot-seat.arrival-walking .bot-avatar{animation:walkingAvatarRadial .9s linear both}
+.opening-active .round-arena .bot-seat.arrival-walking .avatar-chair{transform:translate(calc(-50% + var(--chair-tuck-x)),var(--chair-tuck-y)) scale(.72)}
+.opening-active .round-arena .bot-seat.arrival-pulling-chair .avatar-chair{animation:pullChairRadial .45s cubic-bezier(.2,.75,.3,1) both}
+.opening-active .round-arena .bot-seat.arrival-sitting .avatar-chair{transform:translate(-50%,5px)}
+.round-arena .bot-seat.arrival-ready .avatar-chair{transform:translate(-50%,2px) scale(.9)}
+@keyframes walkingAvatarRadial{0%{opacity:0;transform:translate(calc(-50% + var(--entry-x)),var(--entry-y)) scale(.95)}12%{opacity:1}100%{opacity:1;transform:translate(-50%,0) scale(1.08)}}
+@keyframes pullChairRadial{0%{opacity:.35;transform:translate(calc(-50% + var(--chair-tuck-x)),var(--chair-tuck-y)) scale(.72)}45%{opacity:1}100%{opacity:1;transform:translate(-50%,5px) scale(1)}}
+
+@media(max-width:700px){
+  .round-arena{width:100%;height:min(660px,78vh);min-height:570px;aspect-ratio:auto;margin:4px auto 90px;transform:none}
+  .round-arena .table{inset:15% 10%;border-width:7px;border-radius:48%}
+  .round-arena .bot-seat{left:clamp(45px,var(--seat-x),calc(100% - 45px));top:clamp(45px,var(--seat-y),calc(100% - 58px));width:112px;height:126px;transform:translate(-50%,-50%) scale(.76)}
+  .round-arena .you{width:92%;transform:translate(-50%,-2%)}
+  .opening-active .round-arena .you.opening-arrived{transform:translate(-50%,-2%)!important}
+  .round-arena .you .player-label{display:grid;grid-template-columns:auto auto;justify-content:center;gap:4px 9px}
+  .round-arena .you .player-reaction{grid-column:1/-1;width:min(220px,82vw);max-width:min(220px,82vw);margin:5px auto 0}
+  .round-arena .deck-zone{left:16%;transform:translate(-50%,-50%) scale(.7)}
+  .round-arena .battlefield{width:58%;height:48%;gap:2px}
+  .round-arena .turn-panel{width:72%;bottom:9%}
+  .round-arena .status{font-size:13px;padding:5px 7px}
+  .opening-active .round-arena .bot-seat.arrival-walking,
+  .opening-active .round-arena .bot-seat.arrival-pulling-chair,
+  .opening-active .round-arena .bot-seat.arrival-sitting,
+  .opening-active .round-arena .bot-seat.arrival-seated,
+  .opening-active .round-arena .bot-seat.arrival-ready,
+  .opening-active .round-arena .bot-seat.opening-arrived{transform:translate(-50%,-50%) scale(.76)!important}
+  .opening-active .round-arena .bot-seat.arrival-walking .bot-avatar{animation:walkingAvatarRadialMobile .9s linear both}
+  @keyframes walkingAvatarRadialMobile{0%{opacity:0;transform:translate(calc(-50% + var(--entry-x)),var(--entry-y)) scale(.66)}12%{opacity:1}100%{opacity:1;transform:translate(-50%,0) scale(.76)}}
+}
+
+/* Dungile sunt desenate peste o bază opacă, nu direct peste masa din fundal. */
+.bot-seat .shoulders.sweater{background:repeating-linear-gradient(90deg,transparent 0 8px,#ffffff2b 8px 12px),var(--shirt)}
