@@ -254,3 +254,32 @@ body:after{content:"";position:fixed;inset:-20%;pointer-events:none;background:l
 /* Cartea de atu de sub teanc rămâne fixă între actualizările mesei. */
 .trump,.trump .card{animation:none!important}
 .trump{filter:drop-shadow(0 0 8px #f0bd49)}
+
+/* Teme de masă cumpărate din magazin */
+body.theme-table-red .table{background:radial-gradient(ellipse at center,#5a1320c0,#2b0a10c0);border-color:#ff8a8a33}
+body.theme-table-blue .table{background:radial-gradient(ellipse at center,#123a5ac0,#0a1f33c0);border-color:#8ac4ff33}
+body.theme-table-casino .table{background:radial-gradient(ellipse at center,#0d3d1fc0,#062314c0);border-color:#8affab33}
+
+/* Spate de cărți cumpărate din magazin */
+body.theme-back-gold .card.back,body.theme-back-gold .bot-hand .card{background:repeating-linear-gradient(45deg,#7a5a12 0 6px,#f0d478 6px 9px);border-color:#fff2c4}
+body.theme-back-silver .card.back,body.theme-back-silver .bot-hand .card{background:repeating-linear-gradient(45deg,#4b4f57 0 6px,#d8dee5 6px 9px);border-color:#f2f5f8}
+
+/* Ramă de avatar cumpărată din magazin, aplicată în profil */
+.frame-silver #profilePreview .bot-avatar{outline:3px solid #cfd6de;outline-offset:4px;border-radius:50%}
+.frame-gold #profilePreview .bot-avatar{outline:3px solid #f0c76a;outline-offset:4px;border-radius:50%;box-shadow:0 0 14px #f0c76a77}
+
+/* Tab-uri profil: Garderobă / Clasament / Istoric */
+.profile-tabs{display:flex;gap:6px;margin:14px 0 10px;border-bottom:1px solid #17221e1c;padding-bottom:8px}
+.profile-tab{flex:1;padding:8px 6px;border:0;border-radius:10px;background:transparent;color:#17221e99;font-weight:800;font-size:12px;cursor:pointer}
+.profile-tab.active{background:#17221e12;color:#17221e}
+.profile-tab-panel[hidden]{display:none}
+.tab-hint{font-size:11px;opacity:.6;margin:0 0 8px;text-align:center}
+.leaderboard-list,.history-list{display:grid;gap:6px;max-height:280px;overflow:auto}
+.leaderboard-row{display:grid;grid-template-columns:22px 20px 1fr auto auto;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#17221e0a;font-size:12px}
+.leaderboard-row.me{background:#e9b94930;box-shadow:inset 3px 0 #e9b949}
+.leaderboard-row .rank{font-weight:900;opacity:.6}
+.leaderboard-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-stat{font-size:10px;opacity:.7;white-space:nowrap}
+.history-row{display:grid;grid-template-columns:20px 1fr auto auto;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#17221e0a;font-size:12px}
+.history-row small{font-size:10px;opacity:.55}
+@media(max-width:600px){.profile-tab{font-size:10px;padding:7px 3px}.leaderboard-row,.history-row{font-size:10.5px;padding:7px 8px}}

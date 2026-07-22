@@ -1,0 +1,7 @@
+{
+  "name": "durak-md",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

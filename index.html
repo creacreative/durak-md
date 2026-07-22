@@ -109,8 +109,22 @@
       <h2>Profilul meu</h2>
       <div class="coin-balance"><b id="profileCoins">0</b> 🪙</div>
       <div id="profileStats" class="profile-stats"></div>
-      <h3>Garderobă</h3>
-      <div id="shopItems" class="shop-items"></div>
+      <nav class="profile-tabs" role="tablist">
+        <button data-tab="shop" class="profile-tab active">Garderobă</button>
+        <button data-tab="leaderboard" class="profile-tab">Clasament</button>
+        <button data-tab="history" class="profile-tab">Istoric</button>
+      </nav>
+      <div id="shopTab" class="profile-tab-panel">
+        <div id="shopItems" class="shop-items"></div>
+      </div>
+      <div id="leaderboardTab" class="profile-tab-panel" hidden>
+        <p id="leaderboardHint" class="tab-hint"></p>
+        <div id="leaderboardList" class="leaderboard-list"></div>
+      </div>
+      <div id="historyTab" class="profile-tab-panel" hidden>
+        <p id="historyHint" class="tab-hint"></p>
+        <div id="historyList2" class="history-list"></div>
+      </div>
     </div>
   </div>
   <script src="vendor/peerjs.min.js"></script>
