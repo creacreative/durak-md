@@ -1,5 +1,10 @@
 # Versiuni Durak MD
 
+## v1.1.2 — 22 iulie 2026
+
+- Protecție anti-spam individuală pentru comenzile multiplayer.
+- Jucătorul care depășește limita primește o pauză de 3 secunde fără să blocheze masa.
+
 ## v1.1.1 — 22 iulie 2026
 
 - Eliminată marginea galbenă și evidențierea cărților permise.
