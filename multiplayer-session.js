@@ -85,10 +85,11 @@
     };
   }
 
-  function viewForPlayer(state, playerId) {
+  function viewForPlayer(state, playerId, now = Date.now) {
     const { deck, ...publicState } = state;
     return {
       ...publicState,
+      sentAt: now(),
       players: state.players.map(player => {
         if (player.id === playerId) return { ...player, hand: [...player.hand] };
         const { hand, ...opponent } = player;
@@ -99,5 +100,17 @@
     };
   }
 
-  return { lobbyStatusFor, startGame, viewForPlayer };
+  function localizeReactionForClient(view, receivedAt = Date.now()) {
+    if (!view?.reaction || !Number.isFinite(view.sentAt) || !Number.isFinite(view.reaction.expiresAt)) return view;
+    const remainingMs = Math.max(0, view.reaction.expiresAt - view.sentAt);
+    return {
+      ...view,
+      reaction: {
+        ...view.reaction,
+        expiresAt: receivedAt + remainingMs
+      }
+    };
+  }
+
+  return { lobbyStatusFor, startGame, viewForPlayer, localizeReactionForClient };
 });
