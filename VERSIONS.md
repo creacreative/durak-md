@@ -1,5 +1,9 @@
 # Versiuni Durak MD
 
+## v1.1.1 — 22 iulie 2026
+
+- Eliminată marginea galbenă și evidențierea cărților permise.
+
 ## v1.1.0 — 22 iulie 2026
 
 - Ceremonia completă de intrare la masă funcționează și în multiplayer.
