@@ -22,6 +22,16 @@
     const nickname = showPlayer(value, editingInput);
     localStorage.setItem("durak_nickname", nickname);
   };
+  const guaranteeSpaceKey = input => input?.addEventListener("keydown", event => {
+    if (event.key !== " " && event.code !== "Space") return;
+    event.preventDefault();
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? start;
+    input.setRangeText(" ", start, end, "end");
+    saveNickname(input.value, input);
+  });
   nicknameInput.addEventListener("input", () => saveNickname(nicknameInput.value, nicknameInput));
   if (onlineName) onlineName.addEventListener("input", () => saveNickname(onlineName.value, onlineName));
+  guaranteeSpaceKey(nicknameInput);
+  guaranteeSpaceKey(onlineName);
 })();
