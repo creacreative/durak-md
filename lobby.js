@@ -8,20 +8,20 @@
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[char]);
 
-  const showPlayer = value => {
+  const showPlayer = (value, editingInput = null) => {
     const nickname = value.trim().slice(0, 16) || "Jucător";
     const initial = nickname.charAt(0).toUpperCase();
-    nicknameInput.value = nickname;
-    if (onlineName) onlineName.value = nickname;
+    if (editingInput !== nicknameInput) nicknameInput.value = nickname;
+    if (onlineName && editingInput !== onlineName) onlineName.value = nickname;
     playerList.innerHTML = `<div class="lobby-player-row"><span class="lobby-player-avatar">${escapeHtml(initial)}</span><b>${escapeHtml(nickname)}</b><small>TU</small></div>`;
     return nickname;
   };
 
   showPlayer(localStorage.getItem("durak_nickname") || nicknameInput.value);
-  const saveNickname = value => {
-    const nickname = showPlayer(value);
+  const saveNickname = (value, editingInput) => {
+    const nickname = showPlayer(value, editingInput);
     localStorage.setItem("durak_nickname", nickname);
   };
-  nicknameInput.addEventListener("input", () => saveNickname(nicknameInput.value));
-  if (onlineName) onlineName.addEventListener("input", () => saveNickname(onlineName.value));
+  nicknameInput.addEventListener("input", () => saveNickname(nicknameInput.value, nicknameInput));
+  if (onlineName) onlineName.addEventListener("input", () => saveNickname(onlineName.value, onlineName));
 })();
