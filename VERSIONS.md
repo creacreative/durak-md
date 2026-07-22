@@ -1,5 +1,9 @@
 # Versiuni Durak MD
 
+## v2.0.3 — 22 iulie 2026
+
+- Personajele afișează din nou o replică moldovenească în timpul animației de gândire.
+
 ## v2.0.2 — 22 iulie 2026
 
 - Cartea de atu de sub teanc rămâne statică și nu mai repornește animații la actualizarea mesei.
