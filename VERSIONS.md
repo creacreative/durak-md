@@ -1,5 +1,9 @@
 # Versiuni Durak MD
 
+## v2.0.1 — 22 iulie 2026
+
+- Reparat balonul alb care apărea fără text când personajul se gândea.
+
 ## v2.0.0 — 22 iulie 2026
 
 - Reconectare automată timp de 60 de secunde, cu aceeași mână și același loc.
