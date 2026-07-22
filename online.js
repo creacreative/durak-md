@@ -1,9 +1,10 @@
 (()=>{
-const ui=id=>document.getElementById(id);let peer=null,isHost=false,room="",myPlayerId=null,nextPlayerNumber=0,connections=[],onlineState=null,onlineActive=false,publicHosting=false,reactionTimer=null,reactionViewTimer=null;
+const ui=id=>document.getElementById(id);let peer=null,isHost=false,room="",myPlayerId=null,nextPlayerNumber=0,connections=[],onlineState=null,onlineActive=false,publicHosting=false,reactionTimer=null,reactionViewTimer=null,onlineAttackBatchTimer=null;
+const ONLINE_ATTACK_BATCH_MS=900;
 const ranks=["6","7","8","9","10","J","Q","K","A"],suits=["♠","♥","♦","♣"];
 const rank=c=>ranks.indexOf(c.rank)+(c.suit===onlineState?.trump?20:0),beatsOnline=(d,a)=>(d.suit===a.suit&&rank(d)>rank(a))||(d.suit===onlineState.trump&&a.suit!==onlineState.trump);
 const status=(t,bad=false)=>{ui("networkStatus").textContent=t;ui("networkStatus").className=`network-status ${bad?"error":"ok"}`};
-function cleanPeer(){clearTimeout(reactionTimer);clearTimeout(reactionViewTimer);ui("playerReaction").textContent="";if(publicHosting&&room)window.DurakAuth?.closeRoom(room);publicHosting=false;if(peer)peer.destroy();peer=null;connections=[];onlineActive=false}
+function cleanPeer(){clearTimeout(reactionTimer);clearTimeout(reactionViewTimer);clearTimeout(onlineAttackBatchTimer);document.body.classList.remove("online-active");ui("playerReaction").textContent="";if(publicHosting&&room)window.DurakAuth?.closeRoom(room);publicHosting=false;if(peer)peer.destroy();peer=null;connections=[];onlineActive=false}
 function reactOnline(playerId,kind){let reaction=window.DurakMultiplayerReactions.createMultiplayerReaction(playerId,kind);if(!reaction)return;onlineState.reaction=reaction;clearTimeout(reactionTimer);reactionTimer=setTimeout(()=>{if(isHost&&onlineState?.reaction?.id===reaction.id){delete onlineState.reaction;sync()}},Math.max(0,reaction.expiresAt-Date.now()))}
 function openLobby(){ui("mainMenu").hidden=true;ui("setup").hidden=true;ui("onlineLobby").hidden=false;ui("lobbyChoices").hidden=false;ui("joinArea").hidden=true;ui("publicArea").hidden=true;ui("roomArea").hidden=true;status("")}
 ui("singleMode").onclick=()=>{cleanPeer();ui("mainMenu").hidden=true;ui("setup").hidden=false};ui("multiMode").onclick=openLobby;
@@ -15,28 +16,37 @@ ui("hostRoom").onclick=()=>{isHost=true;room=code();peer=ensurePeer(`durak-${roo
 ui("joinRoom").onclick=()=>{isHost=false;room=ui("roomCode").value.trim().toUpperCase();if(!room)return status("Introdu codul camerei.",true);peer=ensurePeer();if(!peer)return;ui("joinArea").hidden=true;ui("roomArea").hidden=false;ui("copyCode").textContent=room;peer.on("open",()=>{let c=peer.connect(`durak-${room.toLowerCase()}`,{reliable:true});connections=[c];c.on("open",()=>{c.send({type:"join",name:ui("onlineName").value.trim()||"Jucător"});status("Conectat. Așteaptă gazda.")});c.on("data",receive);c.on("close",()=>status("Gazda a închis camera.",true));c.on("error",()=>status("Conexiunea a eșuat.",true))});peer.on("error",e=>status(e.type==="peer-unavailable"?"Camera nu există.":`Eroare: ${e.type}`,true))};
 function acceptConnection(c){if(onlineActive||connections.length>=5){c.on("open",()=>c.send({type:"error",message:"Camera este plină sau partida a început."}));return}connections.push(c);c.on("data",d=>{if(d.type==="join"&&!c.playerId){c.playerId=`player-${nextPlayerNumber++}`;onlineState.lobby.push({id:c.playerId,name:d.name||"Jucător"});send(c,{type:"welcome",playerId:c.playerId});broadcastLobby()}else if(d.type==="action"&&c.playerId)processAction(c.playerId,d.action)});c.on("close",()=>{if(!onlineActive){onlineState.lobby=onlineState.lobby.filter(player=>player.id!==c.playerId);connections=connections.filter(x=>x!==c);broadcastLobby()}})}
 function send(c,d){if(c?.open)c.send(d)}function broadcast(d){connections.forEach(c=>send(c,d))}function broadcastLobby(){drawLobby();broadcast({type:"lobby",lobby:onlineState.lobby})}
-function receive(d){if(d.type==="welcome")myPlayerId=d.playerId;if(d.type==="lobby"){onlineState={lobby:d.lobby};drawLobby()}if(d.type==="state"){myPlayerId=d.playerId||myPlayerId;onlineState=d.state;onlineActive=true;ui("onlineLobby").hidden=true;renderOnline()}if(d.type==="error")status(d.message,true)}
+function receive(d){if(d.type==="welcome")myPlayerId=d.playerId;if(d.type==="lobby"){onlineState={lobby:d.lobby};drawLobby()}if(d.type==="state"){myPlayerId=d.playerId||myPlayerId;onlineState=d.state;onlineActive=true;document.body.classList.add("online-active");ui("onlineLobby").hidden=true;renderOnline()}if(d.type==="error")status(d.message,true)}
 function drawLobby(){let list=onlineState?.lobby||[],view=window.DurakMultiplayerSession.lobbyStatusFor(list.length,isHost);ui("onlinePlayers").innerHTML=list.map((p,i)=>`<div class="online-player"><b>${p.name}</b><span>${i===0?"Gazdă":"Conectat"}</span></div>`).join("");ui("startOnline").hidden=!view.canStart;status(view.message)}
 ui("copyCode").onclick=async()=>{try{await navigator.clipboard.writeText(room);status("Cod copiat!")}catch{status(`Cod: ${room}`)}};
 async function showPublicRooms(){if(!await window.DurakAuth?.requireAccount())return;ui("lobbyChoices").hidden=true;ui("joinArea").hidden=true;ui("publicArea").hidden=false;let box=ui("publicRooms");box.innerHTML="Se caută mese…";try{let rooms=await window.DurakAuth.listRooms();box.innerHTML=rooms.length?rooms.map(r=>`<div class="public-room"><div><b>${r.name}</b><br><span>${r.players}/${r.max_players} jucători</span></div><code>${r.code}</code><button data-room="${r.id}">Intră</button></div>`).join(""):`<p>Nu există mese. Creează tu prima masă!</p>`;box.querySelectorAll("button[data-room]").forEach(b=>b.onclick=async()=>{try{let c=await window.DurakAuth.joinRoom(b.dataset.room);ui("roomCode").value=c;ui("joinRoom").click()}catch(e){ui("publicStatus").textContent=e.message}})}catch(e){box.innerHTML="";ui("publicStatus").textContent=e.message}}
 if(ui("publicRoomsBtn"))ui("publicRoomsBtn").onclick=showPublicRooms;if(ui("refreshRooms"))ui("refreshRooms").onclick=showPublicRooms;if(ui("createPublicBtn"))ui("createPublicBtn").onclick=async()=>{if(!await window.DurakAuth?.requireAccount())return;publicHosting=true;ui("hostRoom").click()};
-ui("startOnline").onclick=()=>{if(!isHost||onlineState.lobby.length<2)return;if(publicHosting)window.DurakAuth?.closeRoom(room,"playing");onlineState=window.DurakMultiplayerSession.startGame(onlineState.lobby);onlineActive=true;ui("onlineLobby").hidden=true;sync()};
+ui("startOnline").onclick=()=>{if(!isHost||onlineState.lobby.length<2)return;if(publicHosting)window.DurakAuth?.closeRoom(room,"playing");onlineState=window.DurakMultiplayerSession.startGame(onlineState.lobby);onlineActive=true;document.body.classList.add("online-active");ui("onlineLobby").hidden=true;sync()};
 function sync(){renderOnline();connections.forEach(c=>send(c,{type:"state",playerId:c.playerId,state:window.DurakMultiplayerSession.viewForPlayer(onlineState,c.playerId)}))}
 function playerById(id){return onlineState.players.find(player=>player.id===id)}
 function next(id){let players=onlineState.players,start=players.findIndex(player=>player.id===id);for(let n=1;n<=players.length;n++){let player=players[(start+n)%players.length];if(!player.out)return player.id}return id}
 function refillOnline(){let s=onlineState,attacker=playerById(s.attacker),defender=playerById(s.defender),order=[attacker,...s.players.filter(p=>p.id!==s.attacker&&p.id!==s.defender),defender];order.forEach(p=>{while(p.hand.length<6&&s.deck.length)p.hand.push(s.deck.pop())});s.players.forEach(p=>{if(!s.deck.length&&!p.hand.length&&!p.out){p.out=true;s.winner.push(p.id)}})}
-function newOnlineRound(att){let s=onlineState;s.battle=[];s.attacker=att;s.defender=next(att);s.limit=Math.min(6,playerById(s.defender).hand.length);s.phase="attack";let alive=s.players.filter(p=>!p.out);if(alive.length<=1){s.over=true;if(alive[0])s.winner.push(alive[0].id)}}
+function newOnlineRound(att){clearTimeout(onlineAttackBatchTimer);let s=onlineState;s.battle=[];s.attacker=att;s.defender=next(att);s.limit=Math.min(6,playerById(s.defender).hand.length);s.phase="attack";let alive=s.players.filter(p=>!p.out);if(alive.length<=1){s.over=true;if(alive[0])s.winner.push(alive[0].id)}}
+function closeOnlineAttackBatch(){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;if(isHost&&onlineState?.phase==="attackBatch"){onlineState.phase="defend";sync()}}
+function scheduleOnlineAttackBatch(){clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=setTimeout(closeOnlineAttackBatch,ONLINE_ATTACK_BATCH_MS)}
 function processAction(playerId,a){
   if(!isHost||onlineState.over)return;
   let s=onlineState,p=playerById(playerId),reactionKind=null;if(!p)return;
   if(a.type==="card"){
     let k=p.hand.findIndex(c=>c.id===a.id);if(k<0)return;let c=p.hand[k];
-    if((s.phase==="attack"||s.phase==="add")&&playerId===s.attacker){
-      if(s.phase==="add"){let rr=new Set(s.battle.flatMap(x=>[x.attack.rank,x.defense?.rank].filter(Boolean)));if(!rr.has(c.rank)||s.battle.length>=s.limit)return}
-      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="defend";reactionKind="attack";
+    if((s.phase==="attack"||s.phase==="add"||s.phase==="attackBatch")&&playerId===s.attacker){
+      if(s.battle.length>=s.limit)return;
+      let ranksOnTable=new Set(s.battle.flatMap(x=>[x.attack.rank,x.defense?.rank].filter(Boolean))),hasDefense=s.battle.some(x=>x.defense);
+      if(s.phase==="add"&&!ranksOnTable.has(c.rank))return;
+      if(s.phase==="attackBatch"&&s.battle.length&&!hasDefense&&c.rank!==s.battle[0].attack.rank)return;
+      if(s.phase==="attackBatch"&&hasDefense&&!ranksOnTable.has(c.rank))return;
+      let firstCard=!s.battle.length;
+      p.hand.splice(k,1);s.battle.push({attack:c});s.phase="attackBatch";scheduleOnlineAttackBatch();if(firstCard)reactionKind="attack";
     }else if(s.phase==="defend"&&playerId===s.defender){
       let o=s.battle.find(x=>!x.defense);if(!o||!beatsOnline(c,o.attack))return;p.hand.splice(k,1);o.defense=c;s.phase="add";reactionKind="defend";
     }
+  }else if(a.type==="sendBatch"&&playerId===s.attacker&&s.phase==="attackBatch"){
+    clearTimeout(onlineAttackBatchTimer);onlineAttackBatchTimer=null;s.phase="defend";
   }else if(a.type==="take"&&playerId===s.defender){
     p.hand.push(...s.battle.flatMap(x=>[x.attack,x.defense].filter(Boolean)));let n=next(s.defender);refillOnline();newOnlineRound(n);reactionKind="take";
   }else if(a.type==="finish"&&playerId===s.attacker&&s.phase==="add"){
@@ -71,6 +81,7 @@ function renderOnline(){
   let action="",fn=null,msg="",defender=s.players.find(p=>p.id===s.defender),actor=s.players.find(p=>p.id===(s.phase==="defend"?s.defender:s.attacker));
   if(s.over){let order=s.winner.map(id=>s.players.find(p=>p.id===id)).filter(Boolean);ui("resultTitle").textContent="Clasament multiplayer";ui("resultText").textContent="Partida s-a terminat.";ui("standings").innerHTML=order.map((p,i)=>`<div class="standing-row"><span class="medal">${i<3?["🥇","🥈","🥉"][i]:"•"}</span><b>${p.name}</b><span>${i===order.length-1?"DURAK":`LOCUL ${i+1}`}</span></div>`).join("");ui("modal").hidden=false;msg="Partida s-a terminat."}
   else if(s.phase==="defend"&&myPlayerId===s.defender){msg="Ești atacat. Apără cartea sau ia masa.";action="Ia cărțile";fn=()=>act({type:"take"})}
+  else if(s.phase==="attackBatch"&&myPlayerId===s.attacker){msg="Mai poți pune rapid cărți permise din aceeași valoare.";action="Trimite atacul";fn=()=>act({type:"sendBatch"})}
   else if((s.phase==="attack"||s.phase==="add")&&myPlayerId===s.attacker){msg=s.phase==="attack"?`Atacă-l pe ${defender.name}.`:"Poți adăuga o valoare de pe masă.";if(s.phase==="add"){action="Gata";fn=()=>act({type:"finish"})}}
   else msg=`Așteaptă mutarea lui ${actor.name}.`;
   setStatus(msg,action,fn)
