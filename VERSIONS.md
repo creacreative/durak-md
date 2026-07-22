@@ -1,5 +1,10 @@
 # Versiuni Durak MD
 
+## v1.2.1 — 22 iulie 2026
+
+- Perevodul a fost eliminat din multiplayer.
+- Apărătorul poate doar să bată cartea sau să ia masa.
+
 ## v1.2.0 — 22 iulie 2026
 
 - Timer vizibil de 30 de secunde pentru fiecare mutare multiplayer.

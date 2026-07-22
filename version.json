@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "releasedAt": "2026-07-22",
-  "notes": "Timer multiplayer de 30 de secunde și mutare automată la expirare."
+  "notes": "Perevodul a fost scos; apărătorul poate doar să bată sau să ia masa."
 }
