@@ -65,7 +65,49 @@
   // Durak (ultimul loc): ton descendent comic, tuba-style.
   function durak() { tone(220, { duration: 0.5, type: "sawtooth", gain: 0.12, glideTo: 90 }); }
 
-  function setMuted(value) {
+  // Reacții (gânduri, atac, luare cărți, supărare, râs) — un tic scurt și distinct per tip.
+function reaction(kind) {
+  if (kind === "think") { tone(520, { duration: 0.09, type: "sine", gain: 0.07 }); tone(460, { delay: 0.09, duration: 0.09, type: "sine", gain: 0.06 }); }
+  else if (kind === "attack") { tone(700, { duration: 0.08, type: "square", gain: 0.09 }); }
+  else if (kind === "take" || kind === "angry") { tone(260, { duration: 0.16, type: "sawtooth", gain: 0.09, glideTo: 170 }); }
+  else if (kind === "laugh") { [740, 660, 740].forEach((f, i) => tone(f, { delay: i * 0.07, duration: 0.08, type: "triangle", gain: 0.08 })); }
+}
+
+// Redare de meme-uri random din folderul sounds/, la apăsarea unui smiley.
+// Protecție anti-spam globală: indiferent care smiley e apăsat, toate
+// rămân blocate 30 de secunde după ultima redare.
+const MEME_FILES = [
+  "TOP5  Pricole  Moldovenesti.mp3",
+  "Plankton Aughhhhh - Funny MEME Sound Effect.mp3",
+  "Nicolae Guta - Fa muiere taitei (Tech House REMIX).mp3",
+  "AUGGHH  AHHHHH sound effect.mp3",
+  "turi ip ip ip meme sound effect.mp3",
+  "Top 5 Pinguinos Madagascar     Subscribe for 500 Subscribers.mp3",
+  "Dramatic funny fart sound effect.mp3"
+];
+const MEME_COOLDOWN_MS = 30000;
+let lastMemePlayedAt = 0;
+let activeMemeAudio = null;
+function playRandomMeme() {
+  const now = Date.now();
+  if (now - lastMemePlayedAt < MEME_COOLDOWN_MS) {
+    return { played: false, remainingMs: MEME_COOLDOWN_MS - (now - lastMemePlayedAt) };
+  }
+  if (muted) return { played: false, remainingMs: 0, muted: true };
+  lastMemePlayedAt = now;
+  const file = MEME_FILES[Math.floor(Math.random() * MEME_FILES.length)];
+  try {
+    if (activeMemeAudio) { activeMemeAudio.pause(); activeMemeAudio = null; }
+    const audio = new Audio(`sounds/${encodeURIComponent(file)}`);
+    audio.volume = 0.7;
+    activeMemeAudio = audio;
+    audio.play().catch(() => {});
+  } catch { /* redarea a eșuat silențios, nu blocăm jocul pentru atât */ }
+  return { played: true, remainingMs: MEME_COOLDOWN_MS };
+}
+function memeCooldownRemaining() { return Math.max(0, MEME_COOLDOWN_MS - (Date.now() - lastMemePlayedAt)); }
+
+function setMuted(value) {
     muted = !!value;
     if (root.localStorage) root.localStorage.setItem(KEY, muted ? "1" : "0");
     if (typeof document !== "undefined") document.dispatchEvent(new CustomEvent("durak-sound-changed", { detail: { muted } }));
@@ -85,7 +127,7 @@
     else wireToggleButton();
   }
 
-  const api = { footstep, sitDown, cardPlace, cardDeal, yourTurn, victory, durak, setMuted, toggleMuted, get isMuted() { return muted; } };
+  const api = { footstep, sitDown, cardPlace, cardDeal, yourTurn, victory, durak, reaction, playRandomMeme, memeCooldownRemaining, setMuted, toggleMuted, get isMuted() { return muted; } };
   root.DurakSound = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof globalThis !== "undefined" ? globalThis : window);

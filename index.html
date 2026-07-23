@@ -35,6 +35,7 @@
       </section>
       <section id="opponents" class="opponents"></section>
       <section class="you">
+        <div id="yourAvatar" class="your-avatar-wrap"></div>
         <div class="player-label"><span>Tu</span><b id="playerCount">6 cărți</b><i id="playerReaction" class="player-reaction"></i></div>
         <div id="playerHand" class="hand"></div>
       </section>
@@ -79,6 +80,12 @@
       <label for="botNumber">Număr de boți</label>
       <div class="bot-picker">
         <button id="lessBots" type="button">−</button><strong id="botNumber">3</strong><button id="moreBots" type="button">+</button>
+      </div>
+      <label for="difficultyPicker">Dificultate boți</label>
+      <div id="difficultyPicker" class="difficulty-picker">
+        <button data-difficulty="easy" type="button">Ușor</button>
+        <button data-difficulty="normal" type="button" class="active">Normal</button>
+        <button data-difficulty="hard" type="button">Greu</button>
       </div>
       <button id="startGame" class="action">Începe partida</button>
     </div>

@@ -52,7 +52,7 @@
     outfit: new Set(["coat", "sweater", "vest"])
   };
   const defaults = {
-    games: 0, victories: 0, first: 0, durak: 0, coins: 60,
+    games: 0, victories: 0, first: 0, durak: 0, coins: 60, streak: 0, bestStreak: 0,
     owned: ["classic", "masa-lemn", "spate-clasic", "rama-none", "titlu-none"],
     equipped: { avatar: "classic", table: "masa-lemn", cardBack: "spate-clasic", frame: "rama-none", title: "titlu-none" },
     recorded: []
@@ -73,6 +73,8 @@
         first: Math.max(0, Number(saved.first) || 0),
         durak: Math.max(0, Number(saved.durak) || 0),
         coins: Math.max(0, Number(saved.coins) || 0),
+        streak: Math.max(0, Number(saved.streak) || 0),
+        bestStreak: Math.max(0, Number(saved.bestStreak) || 0),
         owned: Array.isArray(saved.owned) ? [...new Set([...defaults.owned, ...saved.owned.filter(id => allCosmetics.some(item => item.id === id))])] : [...defaults.owned],
         equipped,
         recorded: Array.isArray(saved.recorded) ? saved.recorded.slice(-60) : []
@@ -131,6 +133,14 @@
     if (position === 1) profile.first += 1;
     if (position === players) profile.durak += 1;
     profile.coins += position === 1 ? 50 : position === players ? 8 : 25;
+    if (position === 1) {
+      profile.streak += 1;
+      if (profile.streak > profile.bestStreak) profile.bestStreak = profile.streak;
+      // Bonus de streak: crește cu fiecare victorie consecutivă, plafonat la +40 monede.
+      if (profile.streak >= 2) profile.coins += Math.min(40, (profile.streak - 1) * 10);
+    } else {
+      profile.streak = 0;
+    }
     if (cloud) recordResultCloud(id, position, players);
     return save();
   }
@@ -209,7 +219,7 @@
     const coins = document.getElementById("profileCoins");
     if (coins) coins.textContent = profile.coins;
     const stats = document.getElementById("profileStats");
-    if (stats) stats.innerHTML = `<span><b>${profile.games}</b> partide</span><span><b>${profile.victories}</b> victorii</span><span><b>${profile.first}</b> locul 1</span><span><b>${profile.durak}</b> Durak</span>`;
+    if (stats) stats.innerHTML = `<span><b>${profile.games}</b> partide</span><span><b>${profile.victories}</b> victorii</span><span><b>${profile.first}</b> locul 1</span><span><b>${profile.durak}</b> Durak</span><span><b>${profile.streak}</b> serie curentă</span><span><b>${profile.bestStreak}</b> cea mai bună serie</span>`;
     const preview = document.getElementById("profilePreview");
     if (preview) preview.innerHTML = previewHTML(publicLook());
     const shop = document.getElementById("shopItems");
